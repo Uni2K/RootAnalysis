@@ -2,7 +2,7 @@
 rm -r ./calib_histograms/charge/
 
 # compile c++ fit routine
-g++ fit_charge.C $(root-config --libs --cflags) -o fit_charge
+g++ fit_charge_new.C $(root-config --libs --cflags) -o fit_charge
 
 #################
 ### CALIB FIT ###

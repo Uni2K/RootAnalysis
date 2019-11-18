@@ -65,7 +65,7 @@ void BL_average()
 	// gStyle->SetImageScaling(30.);
 	gStyle->SetLineScalePS(1);
 
-	TString dir = "./rootfiles/";
+	TString dir = "../rootfiles/";
 
 	int array_size = 0;
 
@@ -80,7 +80,7 @@ void BL_average()
 
 	DIR *d;
 	struct dirent *dirs;
-	char path[1000] = "./rootfiles/";
+	char path[1000] = "../rootfiles/";
 	d = opendir(path);
 	char full_path[1000];
 	char runName[1000];

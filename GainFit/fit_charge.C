@@ -35,7 +35,7 @@ struct stat st = {0};
 
 using namespace std;
 
-const int n_peaks = 6;
+const int n_peaks = 5;
 bool fit=true;
 
 
@@ -65,7 +65,7 @@ Double_t fitf(Double_t *x, Double_t *p)
     Double_t G = p[5];
     Double_t B = p[6];
 
-    sum = sum + p[0] * mu * TMath::Power((mu + k * muXT), k - 1) * TMath::Exp(-(mu + k * muXT)) / TMath::Factorial(k) * (1. / sqrt(2. * TMath::Pi()) / sigmaK) * TMath::Exp(-TMath::Power(((x[0] - k * G + B) / sqrt(2) / sigmaK), 2));
+    sum = sum + p[0] * mu * TMath::Power((mu + k * muXT), k - 1) * TMath::Exp(-(mu + k * muXT)) / TMath::Factorial(k) * (1. / sqrt(2. * TMath::Pi()) / sigmaK) * TMath::Exp(-TMath::Power(((x[0] - (k * G + B)) / sqrt(2) / sigmaK), 2));
   }
   return sum;
 }
@@ -103,7 +103,11 @@ vector<string> split(const string &str, const string &delim)
 	} while (pos < str.length() && prev < str.length());
 	return tokens;
 }
-
+std::string remove_extension(const std::string& filename) {
+    size_t lastdot = filename.find_last_of(".");
+    if (lastdot == std::string::npos) return filename;
+    return filename.substr(0, lastdot); 
+}
 /********************
 __ FIT ROUTINE______
 ********************/
@@ -125,7 +129,7 @@ int main(int argc, char *argv[])
 
   string fileLocation=string(argv[1]);
 	vector<string> splitted=split(string(argv[1]),"//");
-	string _runName=splitted[1];
+	string _runName=remove_extension(splitted[1]);
 
 
 
@@ -135,40 +139,18 @@ int main(int argc, char *argv[])
   int channel = 0;
   int i = 0;
 
-  TCanvas *masterCanvas = new TCanvas("MC", "Overview", 1000, 1000);
-  masterCanvas->Divide(3, 3);
+  TCanvas *masterCanvasGP = new TCanvas("MC", "Overview", 1000, 1000);
+  TCanvas *masterCanvasGaus = new TCanvas("MCG", "Overview", 1000, 1000);
+
+  masterCanvasGP->Divide(3, 3);
+  masterCanvasGaus->Divide(3, 3);
+
 	float gains_charge[8];
 
   for (i = 0; i < sizeof(channels) / sizeof(int); i++)
   {
-    channel = channels[i];
-
-    string path = fileLocation;
-    TFile *file = new TFile(path.c_str());
-    TTree *tree;
-    file->GetObject("T", tree);
-
-    int nBins = 250;
-    int xmin = -80;
-    int xmax = 1000;
-
-    // to show generalized poisson fit
-    TCanvas *C1 = new TCanvas("C1", "GP fit", 800, 800);
-    TH1F *h = new TH1F("h", "PE spectrum - integration window 35 ns", nBins, xmin, xmax);
-
-    TString cut("");
-    tree->Draw(Form("Integral_inRange[%d]>>h", channel), cut); //qS2 integration window width 55ns
-
-    // to show alternative fit
-    TCanvas *C2 = new TCanvas("C2", "alt fit", 800, 800);
-    TH1F *h2 = new TH1F("h2", "", nBins, xmin, xmax);
-    h2 = (TH1F *)h->Clone();
-
-    /***** 
-  __ FIT RANGE___________________________
-  *****/
-    //Ablesen aus Diagrammen
-    std::vector<int> ranges;
+    
+     std::vector<int> ranges;
     if (strstr(_runName.c_str(), "calib_vb56") != NULL)
     {
       ranges = {-20, 10, 39, 67, 90, 120, 145};
@@ -202,9 +184,49 @@ int main(int argc, char *argv[])
       //Falscher Name
       ranges = {-20, 45, 110, 160, 220, 280, 340};
     }
+     // ranges = {0, 50, 100, 160, 220, 280, 340};
+      ranges = {-20, 30, 80, 120, 160, 210, 240};
+
 
     printf("USING RANGES: %d,%d,%d,%d,%d,%d,%d for : %s\n", ranges[0], ranges[1], ranges[2], ranges[3], ranges[4], ranges[5], ranges[6], _runName.c_str());
 
+
+
+    channel = channels[i];
+
+    string path = fileLocation;
+    TFile *file = new TFile(path.c_str());
+    TTree *tree;
+    file->GetObject("T", tree);
+
+    int nBins = 550;
+    int xmin = -80;
+    int xmax = 800;
+
+    // to show generalized poisson fit
+    TCanvas *C1 = new TCanvas("C1", "GP fit", 800, 800);
+    TH1F *h = new TH1F("h", "PE spectrum - integration window 35 ns", nBins, xmin, xmax);
+
+    TString cut("");
+   // tree->Draw(Form("Integral_inRange[%d]>>h", channel), cut); //qS2 integration window width 55ns
+    tree->Draw(Form("Integral[%d]>>h", channel), cut); //qS2 integration window width 55ns
+   for (int m = 0; m < 7; ++m){
+
+      TLine *line = new TLine(ranges[m],0,ranges[m],500);
+      line->SetLineColor(2);
+    //  line->Draw("same");
+    }
+
+    // to show alternative fit
+    TCanvas *C2 = new TCanvas("C2", "alt fit", 800, 800);
+    TH1F *h2 = new TH1F("h2", "", nBins, xmin, xmax);
+    h2 = (TH1F *)h->Clone();
+
+    /***** 
+  __ FIT RANGE___________________________
+  *****/
+    //Ablesen aus Diagrammen
+   
     // read off spectrum, ranges for individual peaks
     // std::vector<int> ranges = {-20,45,95,160,220,270}; // run 51
     // std::vector<int> ranges = {-25,50,110,160,230,300}; // run 52
@@ -259,17 +281,53 @@ int main(int argc, char *argv[])
     f->SetParName(0, "N0");
     f->SetParameter(0, 117600);
     f->SetParName(1, "#mu");
-    f->SetParameter(1, 0.95);
+   // f->SetParameter(1, 0.95);
+    f->SetParameter(1, 7.0);
+
     f->SetParName(2, "#mu_{XT}");
     f->SetParameter(2, 0.2);
     f->SetParName(3, "#sigma_{0 p.e.}");
-    f->SetParameter(3, par_single[2]);
+   // f->SetParameter(3, par_single[2]);
+    f->SetParameter(3,11.0);
+
     f->SetParName(4, "#sigma_{1 p.e.}");
-    f->SetParameter(4, par_single[5]);
+    //f->SetParameter(4, par_single[5]);
+    f->SetParameter(4, -4.0);
+
     f->SetParName(5, "Gain");
-    f->SetParameter(5, 35);
+    f->SetParameter(5, 45);
     f->SetParName(6, "Base line");
-    f->SetParameter(6, 5);
+    //f->SetParameter(6, 5);
+    f->SetParameter(6, 17.0);
+
+
+
+  //Geht fast immer: 
+    f->SetParameter(0, 117600);
+    f->SetParameter(1, 7.0);
+    f->SetParameter(2, 0.2);
+    f->SetParameter(3, 11.0);
+    f->SetParameter(4, -4.0);
+    f->SetParameter(5, 50);
+    f->SetParameter(6, 17.0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //f1->SetParName(6,"#sigma 2 p.e.");f1->SetParameter(6,25*sqrt(2.));
     //f1->SetParName(7,"#sigma 3 p.e.");f1->SetParameter(7,25*sqrt(3.));
     //f1->SetParName(8,"#sigma 4 p.e.");f1->SetParameter(8,25*sqrt(4.));
@@ -303,6 +361,9 @@ int main(int argc, char *argv[])
     h2->GetYaxis()->SetTitle("#Entries");
     h2->GetXaxis()->SetTitle("integral in (mV #times ns)");
     h2->Draw();
+
+
+
 
     Double_t par_alt[3 + n_peaks];
     Double_t par_alt_err[3 + n_peaks];
@@ -381,6 +442,10 @@ int main(int argc, char *argv[])
     leg->AddEntry("gr_alt", "#splitline{individual peak distances}{reg. cont. gauss fit}", "lep");
     leg->Draw();
 
+
+
+ 
+
     /***** 
   __ Export Result ___________________________
   *****/
@@ -417,21 +482,29 @@ int main(int argc, char *argv[])
     fprintf(factor_list, " %f , ", calib_factor);
     fclose(factor_list);
 
+
     gErrorIgnoreLevel = kError; // suppress root terminal output
     C1->Print(pdf_filename1.c_str());
     C2->Print(pdf_filename2.c_str());
     C3->Print(pdf_filename3.c_str());
 
-    masterCanvas->cd(channel+1);
+    masterCanvasGP->cd(channel+1);
     C1->DrawClonePad();
+    masterCanvasGaus->cd(channel+1);
+    C2->DrawClonePad();
+
     gains_charge[i]=calib_factor;
 
   }
 
   string parent_dir = "./calib_histograms/charge/";
   string target_dir = parent_dir + _runName + "/";
-  string overview_filename = target_dir + "overview_" +  _runName + ".pdf";
-  masterCanvas->Print(overview_filename.c_str());
+  string overview_filenameGP = target_dir + "overviewGP_" +  _runName + ".pdf";
+  string overview_filenameGaus = target_dir + "overviewGaus_" +  _runName + ".pdf";
+
+  masterCanvasGP->Print(overview_filenameGP.c_str());
+  masterCanvasGaus->Print(overview_filenameGaus.c_str());
+
   //Summary
 	FILE *summary;
 	summary = fopen((parent_dir + "calibration_charge.txt").c_str(), "a");

@@ -19,7 +19,7 @@ runs = [
 	#"dc_vb54",
 	# "dc_vb55",
  	#"dc_vb56",
-	 "dc_vb57",
+	 "10_calib_vb59_tune8630_pcbb",
 	 "dc_vb58",
 	 "dc_vb591",
  	"dc_vb60",
@@ -30,7 +30,7 @@ runs = [
 
 dirpath = os.getcwd()
 print("current directory is : " + dirpath)
-path = "E:\\Messungen\\Skripte\\DarkCounts\\"
+path = "E:\\Master\\Skripte\\Auswertung\\DarkCounts\\"
 os.chdir( path )
 
 ampdirectory="./Plots/PE_PROB_AMP/"
@@ -52,7 +52,7 @@ api=0
 
 for m in [0,1]:
 	for runID in runs:
-		runName="./rootfiles/"+runID+".root"
+		runName="../rootfiles/"+runID+".root"
 		tree = uproot.open(runName)["T"]
 	
 		is_amp = m
@@ -69,8 +69,8 @@ for m in [0,1]:
 			# sum_npe_lim = 10
 		else:
 			# variable = "Integral_inRange"
-			# variable = "Integral"
-			variable = "chPE_charge"
+			variable = "Integral"
+			#variable = "chPE_charge"
 			variable2 = "charge_array"
 			pe_def = "charge method"
 			npe_idx = "charge"

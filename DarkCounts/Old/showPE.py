@@ -73,7 +73,7 @@ runs = [
 	#"dc_vb54",
 	 #"dc_vb55",
 	# "dc_vb56",
-	 "dc_vb57",
+	 "10_calib_vb59_tune8630_pcbb",
 	 "dc_vb58",
 	 "dc_vb591",
  	"dc_vb60",
@@ -84,7 +84,7 @@ runs = [
 #tree = uproot.open("./a_root_files/0_constBL_Calib_ampW50_intW25_scale0/{0}.root".format(runName))["T"]
 dirpath = os.getcwd()
 print("current directory is : " + dirpath)
-path = "E:\\Messungen\\Skripte\\DarkCounts\\"
+path = "E:\\Messungen\\Skripte\\Auswertung\\DarkCounts\\"
 os.chdir( path )
 
 
