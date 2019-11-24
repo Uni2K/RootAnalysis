@@ -4,7 +4,7 @@
 ### COMPILE   ###
 #################
 
-g++ pe_dist.C `root-config --libs --cflags` -o pe_dist
+g++ LightYield.C `root-config --libs --cflags` -o pe_dist
 
 ##################
 ### INITIALIZE ###

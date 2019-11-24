@@ -4,7 +4,7 @@
 ### COMPILE   ###
 #################
 
-g++ fit_charge_new.C `root-config --libs --cflags` -o fit_charge_new
+g++ FitCharge.C -lstdc++fs `root-config --libs --cflags ` -o fit_charge_new
 
 ##################
 ### INITIALIZE ###
@@ -48,6 +48,36 @@ do_calib()
 }
 
 export -f do_calib
+
+
+for file in "../rootfiles/"/*; do
+	#without extension
+
+	rootFilePath=$file
+	
+	prefix="../rootfiles//"
+	runName=${file#$prefix} #Remove prefix
+	suffix=".root"
+	runName=${runName%$suffix} #Remove suffix
+	
+	runNr=`echo "$runName" | sed -r 's/^([^.]+).*$/\1/; s/^[^0-9]*([0-9]+).*$/\1/'`
+	numberOfPeaks=9
+
+	#echo $runName $runNr "6075PE" "40-SiPM" "sw5" $numberOfPeaks $rootFilePath
+	 	#echo $string
+	#printf "%s\n" ${channel_list[@]} | xargs -n 1 -P 1 bash -c "do_calib $string"
+	
+	#"9_calib_vb58_tune8530_pcbb 9 6075PE 40-SiPM sw5 10"
+
+	./fit_charge_new $runName $runNr "6075PE" "40-SiPM" "sw5" $numberOfPeaks $rootFilePath
+done
+
+
+
+
+
+
+
 
 data_list=(
 	# DARK COUNT
@@ -130,7 +160,7 @@ data_list=(
 	
 	)
 
-echo -e ${data_list[@]} | tr '\n' '\0' | xargs -0 -n 1 -P 1 bash -c "do_calib"
+#echo -e ${data_list[@]} | tr '\n' '\0' | xargs -0 -n 1 -P 1 bash -c "do_calib"
 
 
 echo

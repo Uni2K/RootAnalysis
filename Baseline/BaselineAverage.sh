@@ -4,7 +4,7 @@
 ### COMPILE   ###
 #################
 
-g++ BL_average_new.C `root-config --libs --cflags` -o BL_average_new
+g++ BaselineAverage.C `root-config --libs --cflags` -o BL_average_new
 
 ##################
 ### INITIALIZE ###
@@ -36,7 +36,7 @@ for file in "../rootfiles/"/*; do
 	runName=${runName%$suffix} #Remove suffix
 	
 	runNr=`echo "$runName" | sed -r 's/^([^.]+).*$/\1/; s/^[^0-9]*([0-9]+).*$/\1/'`
-	xLimit=3
+	xLimit=2
 
 	 
 
@@ -47,15 +47,6 @@ for file in "../rootfiles/"/*; do
 
 	./BL_average_new $runName $runNr "40-SiPM" "sw5" $xLimit $rootFilePath
 done
-
-
-
-
-
-
-
-
-
 
 
 
