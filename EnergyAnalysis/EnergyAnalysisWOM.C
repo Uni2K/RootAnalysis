@@ -437,6 +437,16 @@ int main(int argc, char *argv[])
 			gr->GetXaxis()->SetLabelSize(0.035);
 			gr->GetYaxis()->SetLabelSize(0.035);
 
+		
+
+
+
+
+			//gStyle->SetOptFit(1111);
+			//gr->Fit("pol1");
+			//gr->GetFunction("pol1")->SetLineColor(co);
+
+
 			legend->SetHeader(wom_id.c_str(),"L");
 			legend->AddEntry(gr, ("Position: " + position).data(), "lep");
 
@@ -466,6 +476,16 @@ int main(int argc, char *argv[])
 		mg->GetYaxis()->SetLabelSize(0.038);
 		mg->Draw("c p A");
 		legend->Draw();
+
+
+
+
+
+			/*Float_t rightmax = 3000.0;
+   			Float_t scale = gPad->GetUymax()/rightmax;
+			TGaxis *axis = new TGaxis(6,0.0,5.9999,(maxOfWOM+0.1*maxOfWOM),-0.5,10000,510,"=");
+			axis->SetLineColor(kRed);
+			axis->Draw();*/
 
 		gPad->SetGrid(1, 1);
 		gPad->Modified();
