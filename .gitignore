@@ -33,3 +33,5 @@ LightYield/.vscode/settings.json
 Kalibration/cal_fit_routine_2.zip
 LightYield/pe_dist
 MaskAnalysis/maskfile
+GainFit/fit_charge_new
+GainFit/fit_charge
