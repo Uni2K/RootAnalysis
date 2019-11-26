@@ -28,7 +28,9 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <experimental/filesystem>
 
+namespace fs = std::experimental::filesystem;
 using namespace std;
 
 // const int n_peaks = 5;
@@ -105,16 +107,38 @@ int main(int argc, char **argv)
   string wom_id = (string)argv[4];
   string sw_id = (string)argv[5];
   int n_peaks = atoi(argv[6]);
+  string fileLocation=string(argv[7]);
 
+
+
+	
   // __SETTINGS_____
 
+  n_peaks=4;
+  int fitLimitEnd=200; 
+  int fitLimitStart=-40; //40
+  int xmin = -50;
+  int xmax = 400;
+  int nBins = (200 - xmin) * 1;
+  float range = 10; 
+  //VB59: 9,700,[-50,700], 15
+  
+   //Single Gauss Fit Range x2
   // import/export directories & files
-  string root_dir = "../rootfiles/"; // root files
+  //string root_dir = "../rootfiles/"; // root files
   // string root_dir = "../a_root_files/0_new_dynBL_noCalib_ampW50_intW25_scale0/"; // root files
-  string in_dir = root_dir + run_name + ".root";                                     // path to current root file
-  string out_dir = "./calib_histograms/charge/" + sipm_id + "/";                     // to export plots and values
-  string calib_factor_out_list = "calib_factor_" + sipm_id + Form("_run%d", run_nr); // filename
-  string BL_offset_out_list = "BL_offset_" + sipm_id + Form("_run%d", run_nr);       // filename values list
+  //string in_dir = root_dir + run_name + ".root";   
+  string in_dir = fileLocation; // path to current root file
+                                  // path to current root file
+  string out_dir = Form("./calib_histograms/charge/%s/",run_name.c_str());                     // to export plots and values
+  string calib_factor_out_list = Form("calib_factor_run%d", run_nr); // filename
+  string BL_offset_out_list =  Form("BL_offset_run%d", run_nr);       // filename values list
+
+  if (!fs::is_directory(out_dir) || !fs::exists(out_dir)) { // Check if src folder exists
+		fs::create_directory(out_dir); // create src folder
+	}
+
+
 
   // store results in .txt file
   string calib_list_filename = out_dir + calib_factor_out_list + ".txt";
@@ -141,10 +165,7 @@ int main(int argc, char **argv)
 
   // histogram settings
   // int nBins = 250;
-  int xmin = -50;
-  int xmax = 1200;
-  int nBins = (xmax - xmin) * 1;
-
+ 
   // y-range of calib factor plot
   // double l_values = 28, u_values =48;
   double l_values = 5, u_values = 9;
@@ -249,10 +270,25 @@ int main(int argc, char **argv)
     {
       ranges = {-20, 50, 120, 160, 220, 280, 330, 380, 440, 500, 550, 600, 660, 710, 770};
     }
+    //ranges = {-20, 50, 120, 160, 220, 280, 330, 380, 440, 500, 550, 600, 660, 710, 770};
+    //ranges = {-20, 40, 85, 140, 190, 240, 300, 350, 400, 450, 500, 550,600, 660, 710, 770};
+   // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835};
+    //ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835}; GOOD FOR VB59
+
+  //59V PCBD Tune86
+     // ranges = {-20, 45, 80, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835};
+
+    //DC 58 PCBA
+    ranges = {-20, 30, 70, 120, 170};
+
+
+
+
 
     // open tree
-
+    cout<<"Doing: "<<in_dir<<endl;
     TFile *file = new TFile(in_dir.c_str());
+
     TTree *tree;
     file->GetObject("T", tree);
 
@@ -282,6 +318,11 @@ int main(int argc, char **argv)
     h2 = (TH1F *)h->Clone();
     h2->GetXaxis()->SetRangeUser(xmin, xmax);
 
+
+    //C2->SetLogy();
+    //C1->SetLogy();
+
+
     /***** 
     __ PRE FIT - Single Gauss fits___________________________
     *****/
@@ -302,7 +343,7 @@ int main(int argc, char **argv)
     Double_t par_single[3 * n_peaks];
     for (int i = 0; i < n_peaks; ++i)
     {
-      float range = 15; // run 47
+      // run 47
       // float range = 12; // symmetric fit range for individual peaks
       peak_single[i] = new TF1("peak", "gaus", pos_peak[i] - range, pos_peak[i] + range);
       peak_single[i]->SetParameter(2, 10);
@@ -315,7 +356,7 @@ int main(int argc, char **argv)
     __ GENERALIZED POISSON FIT * GAUSS FIT ___________________________
     *****/
 
-    TF1 *f = new TF1("fitf", fitf, -20, 800, 7);
+    TF1 *f = new TF1("fitf", fitf, fitLimitStart, fitLimitEnd, 7);
     h->GetYaxis()->SetTitle("entries");
     h->GetXaxis()->SetTitle("pulse-height(integral) [mV #times ns]");
     f->SetLineColor(kGreen);
@@ -361,6 +402,39 @@ int main(int argc, char **argv)
     double sig0_err = f->GetParError(3);
     double sig1 = f->GetParameter(4);
     double sig1_err = f->GetParError(4);
+
+
+
+    TF1 *fCopy = new TF1("copy", fitf, -20, 1000, 7);
+    fCopy->SetLineColor(kBlue);
+    fCopy->SetLineStyle(2);
+    fCopy->SetNpx(1000);
+
+    fCopy->SetParName(0, "N0");
+    fCopy->SetParameter(0, f->GetParameter(0));
+    fCopy->SetParName(1, "#mu");
+    fCopy->SetParameter(1, f->GetParameter(1));
+    fCopy->SetParName(2, "#mu_{XT}");
+    fCopy->SetParameter(2,f->GetParameter(2));
+    fCopy->SetParName(3, "#sigma_{0 p.e.}");
+    fCopy->SetParameter(3, f->GetParameter(3));
+    fCopy->SetParName(4, "#sigma_{1 p.e.}");
+    fCopy->SetParameter(4, f->GetParameter(4));
+    fCopy->SetParName(5, "Gain");
+    fCopy->SetParameter(5,f->GetParameter(5));
+    fCopy->SetParName(6, "Base line");
+    fCopy->SetParameter(6, f->GetParameter(6));
+
+
+
+
+
+
+
+
+
+
+
 
     /***** 
     __ ALTERNATIVE MULTI-GAUSS FIT ___________________________
@@ -411,7 +485,7 @@ int main(int argc, char **argv)
       f_s[i]->SetNpx(1000);
       f_s[i]->Draw("same");
     }
-
+    fCopy->Draw("same");
     alt->Draw("same");   // draw fit above individual fit graphs
     h->Draw("FUNCsame"); // also draw GP fit
 
@@ -424,7 +498,7 @@ int main(int argc, char **argv)
     double gauss_chi2_ndof = alt->GetChisquare() / alt->GetNDF();
 
     // custom legend
-    TLegend *h_leg = new TLegend(0.65, 0.45, 0.95, 0.9);
+    TLegend *h_leg = new TLegend(0.65, 0.65, 0.99, 0.9);
     h_leg->SetTextSize(0.02);
     h_leg->AddEntry(h2, Form("#bf{data}"), "lpef");
     h_leg->AddEntry((TObject *)0, Form("entries: %1.0f", h2->GetEntries()), "");
@@ -459,6 +533,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < n_peaks - 2; ++i)
     {
       diff[i] = (pos_alt[i + 2] - pos_alt[i]) / 2;
+
       u_diff[i] = 1. / 2 * sqrt(u_pos_alt[i + 2] * u_pos_alt[i + 2] + u_pos_alt[i] * u_pos_alt[i]);
       wght[i] = 1. / (u_diff[i] * u_diff[i]);
       sum1 += diff[i] * wght[i];

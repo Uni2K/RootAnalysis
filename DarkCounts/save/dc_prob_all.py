@@ -6,19 +6,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import uproot
 
-from os import listdir
-from os.path import isfile, join
-
-#start from Visual Studio Code (F1 with RunExtension) or with F5 (Debugging Sessions)
-
-
-
 ####################
 ## PE SLICES PROB ##
 ####################
 
 def pe_slice_prob(df,pe_val):
-#pe_val= Empty array
 
 	#__ DATAFRAME OF PE SLICES ___
 
@@ -27,13 +19,13 @@ def pe_slice_prob(df,pe_val):
 		slice_names.append("N_pe{0}".format(i))	
 
 	sc = 0 # slice counter
-	d_pe_collection = {} #array=dict
+	d_pe_collection = {}
 	# sum
 	for k in pe_val:
 		if k == 0:
-			d_pe_collection[slice_names[sc]] = df.iloc[:,0][(df.iloc[:,0]<k+0.5) ] #All Values inside [-inf;0.5]
+			d_pe_collection[slice_names[sc]] = df.iloc[:,0][(df.iloc[:,0]<k+0.5) ]
 		else:
-			d_pe_collection[slice_names[sc]] = df.iloc[:,0][ (df.iloc[:,0]>=k-0.5) & (df.iloc[:,0]<k+0.5) ] #All Values in [k-0.5;k+0.5]
+			d_pe_collection[slice_names[sc]] = df.iloc[:,0][ (df.iloc[:,0]>=k-0.5) & (df.iloc[:,0]<k+0.5) ]
 		sc = sc+1
 
 	df_pe_slices = pd.DataFrame.from_dict(d_pe_collection)
@@ -42,10 +34,10 @@ def pe_slice_prob(df,pe_val):
 		# sum
 	sc = 0		
 	for i in range(0,len(pe_val)):
-		slice_prob[0,i] = len( df_pe_slices[slice_names[sc]].dropna() ) / len(df) # Probability = events in range / all events
+		slice_prob[0,i] = len( df_pe_slices[slice_names[sc]].dropna() ) / len(df)
 		sc = sc+1
 
-	df_slice_sum_prob = pd.DataFrame(data=slice_prob.T,columns=df.columns) # new Dataframe with probabilities and column names
+	df_slice_sum_prob = pd.DataFrame(data=slice_prob.T,columns=df.columns)
 	
 	return df_slice_sum_prob 
 
@@ -55,78 +47,136 @@ def pe_slice_prob(df,pe_val):
 
 def pe_cum_prob(df_pe_slices_prob,pe_val):
 	#__ DATAFRAME OF CUMMULATIVE PE PROBABILITIES ____
-	slice_cprob = np.zeros( (1,len(pe_val)) ) #1 Row, 30 Columns
+	slice_cprob = np.zeros( (1,len(pe_val)) )
 	# sum
 	sc = 0		
 	for i in range(0,len(pe_val)):
-		slice_cprob[0,i] = df_pe_slices_prob.iloc[i:len(pe_val),0].sum() #Sum over all slices starting from a a npe value-> first value should be near 1
+		slice_cprob[0,i] = df_pe_slices_prob.iloc[i:len(pe_val),0].sum()
 		sc = sc+1
 
 	df_slice_cprob = pd.DataFrame(data=slice_cprob.T,columns=df_pe_slices_prob.columns)
-	#		Integral_ch0
-	#	0       0.015894
-	#	1       0.015445
-
-
 	return df_slice_cprob
 
 ################
 ## INITIALIZE ##
 ################
 
-directory = os.path.join( os.getcwd())
+directory = os.path.join( os.getcwd() )
 
 # source directory
-#root_dir = str(directory+"/rootfiles/")  Does not work sometimes, depending from where you start the script
-root_dir="E:\\Master\\Skripte\\Auswertung\\rootfiles\\"
-out_dir= "E:\\Master\\Skripte\\Auswertung\\DarkCounts\\DCRPlots\\"
-#root_dir = str("../rootfiles/")
+root_dir = str(directory+"/../a_root_files/0_new_constBL_Calib_ampW25_intW25_scale0/")
 
 # output directories
-#out_dir = str(directory+"\\DarkCounts\\DCRPlots\\")
+out_dir = str(directory+"/dc_prob_results/charge/")
 if not os.path.isdir(out_dir):
     os.system("mkdir -p %s"%out_dir)
 
+if not os.path.isdir(str(out_dir+"3075PE")):
+    os.system("mkdir -p %s"%str(out_dir+"3075PE"))
+if not os.path.isdir(str(out_dir+"6075PE")):
+    os.system("mkdir -p %s"%str(out_dir+"6075PE"))
+if not os.path.isdir(str(out_dir+"6050PE")):
+    os.system("mkdir -p %s"%str(out_dir+"6050PE"))
 
 
 # ___ INPUT LISTs ___
 
-
-run_list = [f for f in listdir(root_dir) if isfile(join(root_dir, f))]
-
+# root file names
+run_list = [
+	"43_40SiPM_1_sw1_DarCount_lOff_HV60_TestbeamConfig_240119",
+	"49_40SiPM_2_sw1_DarkCount_lOff_HV60_TestbeamConfig_040219",
+	"80_40SiPM_0_sw1_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"40_40SiPM_1_sw2_DarCount_lOff_HV60_TestbeamConfig_240119",
+	"48_40SiPM_2_sw2_DarkCount_lOff_HV60_TestbeamConfig_040219",
+	"78_40SiPM_0_sw2_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"74_40SiPM_0_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"86_40SiPM_1_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"86_40SiPM_2_sw4_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"83_8SiPM_17_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"66_8SiPM_0_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"67_8SiPM_1_DarkCount_lOff_HV60_TestbeamConfig_210319",
+	"70_8SiPM_2_DarkCount_lOff_HV60_TestbeamConfig_210319"
+]
 
 # data frame column names
 clmn_list = [
 	"40SiPM_1_sw1",
-	"40SiPM_2_sw1"
+	"40SiPM_2_sw1",
+	"40SiPM_0_sw1",
+	"40SiPM_1_sw2",
+	"40SiPM_2_sw2",
+	"40SiPM_0_sw2",
+	"40SiPM_0_sw4",
+	"40SiPM_1_sw4",
+	"40SiPM_2_sw4",
+	"8SiPM_17",
+	"8SiPM_0",
+	"8SiPM_1",
+	"8SiPM_2"
 ]
 # plot title info
 label_list = [
-	"WOM D","WOM D","WOM D","WOM D",
-	"WOM D","WOM D","WOM D","WOM D",
-	"WOM D","WOM D","WOM D","WOM D",
-	"WOM D","WOM D","WOM D","WOM D"
+	"WOM-C, sw1",
+	"WOM-D, sw1",
+	"40-SiPM, Array-0, sw1",
+	"WOM-C, sw2",
+	"WOM-D, sw2",
+	"40-SiPM, Array-0, sw2",
+	"40-SiPM, Array-0, sw4",
+	"WOM-C, sw4",
+	"WOM-D, sw4",
+	"8-SiPM, Array-TB17",
+	"8-SiPM, Array-0",
+	"WOM-A",
+	"WOM-B"
 ]
 # sipm type
 sipm_id_list = [
-	"40-SiPM","40-SiPM","40-SiPM","40-SiPM",
-	"40-SiPM","40-SiPM","40-SiPM","40-SiPM",
-	"40-SiPM","40-SiPM","40-SiPM","40-SiPM",
-	"40-SiPM","40-SiPM","40-SiPM","40-SiPM"
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"3075PE",
+	"6050PE",
+	"6075PE",
+	"6075PE",
+	"6075PE",
 ]
 # wom/array type
 wom_id_list = [
-	"WOM D","WOM D","WOM D","WOM D",
-	"WOM D","WOM D","WOM D","WOM D",
-	"WOM D","WOM D","WOM D","WOM D",
-	"WOM D","WOM D","WOM D","WOM D"
+	"WOM-C",
+	"WOM-D",
+	"40Array0",
+	"WOM-C",
+	"WOM-D",
+	"40Array0",
+	"40Array0",
+	"WOM-C",
+	"WOM-D",
+	"8ArrayTB17",
+	"8Array0",
+	"WOM-A",
+	"WOM-B",
 ]
 # switch configuration
 sw_id_list = [
-	"","","","",
-	"","","","",
-	"","","","",
-	"","","",""
+	"sw1",
+	"sw1",
+	"sw1",
+	"sw2",
+	"sw2",
+	"sw2",
+	"sw4",
+	"sw4",
+	"sw4",
+	"none",
+	"none",
+	"none",
+	"none",
 ]
 
 #############
@@ -151,18 +201,10 @@ v_mean = []
 
 run_count = 0
 for runName in run_list:
-	runNameWithoutExtension=os.path.splitext(runName)[0]
-	print(runNameWithoutExtension)
-	path="{:s}{:s}\\".format(out_dir,runNameWithoutExtension)
+	tree = uproot.open(root_dir+"/{0}.root".format(runName))["T"]
 
-	if os.path.isdir(path):	
-		os.remove(path)
-	os.system("mkdir -p %s"%path)
-
-	tree = uproot.open(root_dir+"/{0}".format(runName))["T"]
-
-	ch_variable = "Integral"
-	sum_variable = "chargeChannelSumWOM" #Keeps all WOM sums, for wavecatcher 16Ch with Channel 0-7 -> WOMID=3=D -> [3] keeps the results, proof with print(df_sum)
+	ch_variable = "chPE_charge"
+	sum_variable = "charge_array"
 	# variable3 = "charge_array_scaled"
 
 	# get single channel charge branch
@@ -174,28 +216,23 @@ for runName in run_list:
 	for i in range(0,8):
 			clmns.append("{1}_ch{0}".format(i,ch_variable))
 
-	df_ch = df_ch.drop([0],axis=1) #drop first column -> Row Numbers
-	df_ch.columns = clmns #New Column Names
+	df_ch = df_ch.drop([0],axis=1)
+	df_ch.columns = clmns
 	df_ch = df_ch.replace([np.inf, -np.inf], np.nan)
 
 	# get sum branch
 	df_sum = tree.pandas.df([sum_variable])
-	df_sum = df_sum.drop(df_sum.columns[0:3],axis=1) #NEEDED cause df_sum= array with size 4, and 0-2 are holding bullshit
-	df_sum.columns.values[0] = sum_variable #rename column back from sumXXX[3] to sumXXX
-	#print(df_sum)
-
 	df_sum = pd.DataFrame(df_sum.iloc[:,0],columns=[sum_variable])
-
 	df_sum = df_sum.replace([np.inf, -np.inf], np.nan)
 
 	# loop over datasets, 8 channels + 1 sum
 	for i in range(0,9):
 		
-		df_charge = pd.DataFrame() #Create Empty Dataframe
+		df_charge = pd.DataFrame()
 		data_id = ""
-		if i!=8: #Channel
-			df_charge = pd.DataFrame(df_ch.iloc[:,i],columns=[clmns[i]]) #Create Channel DF with 1 Column on ith place and column name from clmns
-			data_id = "{:s}_ch{:d}".format(clmn_list[run_count],i) #Create Name
+		if i!=8:
+			df_charge = pd.DataFrame(df_ch.iloc[:,i],columns=[clmns[i]])
+			data_id = "{:s}_ch{:d}".format(clmn_list[run_count],i)
 		else:
 			df_charge = df_sum
 			data_id = "{:s}_sum".format(clmn_list[run_count])
@@ -205,13 +242,7 @@ for runName in run_list:
 
 		# probability of PE slices 
 		df_pe_slices_prob = pe_slice_prob(df_charge,pe_val)	
-		#			Integral_ch3
-		#	0        0.00010
-		#	1        0.00000
 
-
-
-		#print(df_pe_slices_prob)
 		# print("PE SLICES PROB")
 		# print(df_pe_slices_prob.head(10))
 		# print(df_pe_slices_prob.sum(axis=0))
@@ -224,13 +255,11 @@ for runName in run_list:
 
 		#___ SAVE RESULTS ____
 		d_data["{:s}".format(data_id)] = df_charge.iloc[:,0]
-		#print(d_data)
 		d_prob["prob_{:s}".format(data_id)] = df_pe_slices_prob.iloc[:,0]
 		d_cprob["cprob_{:s}".format(data_id)] = df_pe_slice_cprob.iloc[:,0]
 		v_mean.append( mean_charge )
 
 	run_count = run_count + 1
-#print(d_data)
 
 df_data = pd.DataFrame.from_dict(d_data)
 
@@ -290,16 +319,14 @@ for i in range(0,len(run_list)):
 		if k!=8:
 			data_id = "{:s}_ch{:d}".format(clmn_list[i],k)
 			single_fig_title = str(fig_title+", ch{:d}".format(k))
-			#pdf_filename = "{:s}{:s}/{:s}_{:s}_ch{:d}.pdf".format(out_dir,sipm_id_list[i],run_list[i],wom_id_list[i],k)
-			pdf_filename = "{:s}{:s}/{:s}_ch{:d}.pdf".format(out_dir,runNameWithoutExtension,run_list[i],k)
-
+			pdf_filename = "{:s}{:s}/{:s}_{:s}_ch{:d}.pdf".format(out_dir,sipm_id_list[i],run_list[i],wom_id_list[i],k)
 			x_min = -1.5
 			x_max = 20.5
 			x_ticks = np.arange(0, x_max+1,1)
 		else:
 			data_id = "{:s}_sum".format(clmn_list[i])
 			single_fig_title = str(fig_title+", sum")
-			pdf_filename = "{:s}{:s}/{:s}_sum.pdf".format(out_dir,runNameWithoutExtension,run_list[i])
+			pdf_filename = "{:s}{:s}/{:s}_{:s}_sum.pdf".format(out_dir,sipm_id_list[i],run_list[i],wom_id_list[i])
 			x_min = -5.5
 			x_max = 30.5
 			x_ticks = np.arange(0, x_max+1,5)
@@ -347,7 +374,7 @@ for i in range(0,len(run_list)):
 		for m in range(0,3):
 			ax_comb.append(ax1[j,m])
 
-	comb_pdf_filename = "{:s}{:s}/{:s}.pdf".format(out_dir,runNameWithoutExtension,run_list[i])
+	comb_pdf_filename = "{:s}{:s}/{:s}_{:s}.pdf".format(out_dir,sipm_id_list[i],run_list[i],wom_id_list[i])
 
 	# loop over datasets, 8 channels + 1 sum
 	for k in range(0,9):
@@ -405,14 +432,14 @@ fig_title = "dark count - cumulative probability, Hamamatsu S13360 series"
 fig2.suptitle(fig_title)
 ax = ax2
 
-comb_sum_pdf_filename = "{:s}{:s}\\cprob_all_charge.pdf".format(out_dir,runNameWithoutExtension)
+comb_sum_pdf_filename = "{:s}/cprob_all_charge.pdf".format(out_dir)
 
 m_size = 3.5
 m_style = ["D", "v", "^","*","d", "o", "s"]
 l_style = ["--", "-", "-.",":","--", "-", "-."]
 l_color = ["mediumvioletred", "darkgreen", "darkblue", "red","darkorange", "mediumseagreen", "deepskyblue"]
 # select only cases used in test-beams
-select_runs = [0]
+select_runs = [6,7,8,9,10,11,12]
 select_cntr = 0
 for i in select_runs:
 	## probability, cumulative
@@ -439,7 +466,7 @@ fig_title = "dark count - cumulative probability, Hamamatsu S13360-3075PE"
 fig3.suptitle(fig_title)
 ax = ax3
 
-comb_40SiPM_sum_pdf_filename = "{:s}{:s}\\cprob_40SiPM_charge.pdf".format(out_dir,runNameWithoutExtension)
+comb_40SiPM_sum_pdf_filename = "{:s}/cprob_40SiPM_charge.pdf".format(out_dir)
 
 m_size = 3.5
 m_style = ["D", "v", "^","D", "v", "^","D", "v", "^",]
@@ -452,7 +479,7 @@ l_color = ["darkblue", "darkblue", "darkblue", "darkgreen","darkgreen","darkgree
 
 # select only 40 SiPM arrays
 # select_runs = [0,1,2,3,4,5,6,7,8]
-select_runs = [0]
+select_runs = [6,7,8,5,3,4,2,0,1]
 # select_runs = [2,5,6,0,3,7,1,4,8]
 select_cntr = 0
 for i in select_runs:
