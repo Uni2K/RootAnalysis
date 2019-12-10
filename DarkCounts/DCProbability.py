@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import uproot
-
+import shutil
 from os import listdir
 from os.path import isfile, join
 
@@ -98,6 +98,9 @@ run_list = [f for f in listdir(root_dir) if isfile(join(root_dir, f))]
 # data frame column names
 clmn_list = [
 	"40SiPM_1_sw1",
+	"40SiPM_2_sw1",
+	"40SiPM_2_sw1",
+	"40SiPM_2_sw1",
 	"40SiPM_2_sw1"
 ]
 # plot title info
@@ -146,7 +149,7 @@ d_data = {}
 d_prob = {}
 d_cprob = {}
 v_mean = []
-
+triggerChannel=8
 #__ loop over ALL RUNS ____
 
 run_count = 0
@@ -156,8 +159,8 @@ for runName in run_list:
 	path="{:s}{:s}\\".format(out_dir,runNameWithoutExtension)
 
 	if os.path.isdir(path):	
-		os.remove(path)
-	os.system("mkdir -p %s"%path)
+		shutil.rmtree(path)
+	os.system("mkdir %s"%path)
 
 	tree = uproot.open(root_dir+"/{0}".format(runName))["T"]
 
@@ -168,21 +171,30 @@ for runName in run_list:
 	# get single channel charge branch
 	df_temp = tree.pandas.df([ch_variable],flatten=False)
 	df_ch = pd.DataFrame( df_temp[ch_variable].values.tolist(), index=df_temp.index )
+
+
 	del df_temp
 
 	clmns = []
 	for i in range(0,8):
 			clmns.append("{1}_ch{0}".format(i,ch_variable))
 
-	df_ch = df_ch.drop([0],axis=1) #drop first column -> Row Numbers
+	df_ch = df_ch.drop([triggerChannel],axis=1) #drop first column -> Row Numbers
 	df_ch.columns = clmns #New Column Names
 	df_ch = df_ch.replace([np.inf, -np.inf], np.nan)
 
+
+
 	# get sum branch
 	df_sum = tree.pandas.df([sum_variable])
+
 	df_sum = df_sum.drop(df_sum.columns[0:3],axis=1) #NEEDED cause df_sum= array with size 4, and 0-2 are holding bullshit
 	df_sum.columns.values[0] = sum_variable #rename column back from sumXXX[3] to sumXXX
 	#print(df_sum)
+
+
+
+
 
 	df_sum = pd.DataFrame(df_sum.iloc[:,0],columns=[sum_variable])
 
@@ -203,11 +215,13 @@ for runName in run_list:
 		# mean of distribution
 		mean_charge = df_charge.mean()
 
+	
+
 		# probability of PE slices 
 		df_pe_slices_prob = pe_slice_prob(df_charge,pe_val)	
 		#			Integral_ch3
-		#	0        0.00010
-		#	1        0.00000
+		#0        0.00010
+		#1        0.00000
 
 
 
@@ -217,6 +231,7 @@ for runName in run_list:
 		# print(df_pe_slices_prob.sum(axis=0))
 
 		# cumulative probability of PE slices 
+
 		df_pe_slice_cprob = pe_cum_prob(df_pe_slices_prob,pe_val)
 
 		# print("CUMM. PROB")	
@@ -273,7 +288,8 @@ ch_npe_lim = 1
 
 # loop over runs
 for i in range(0,len(run_list)):
-	
+	runNameWithoutExtension=os.path.splitext(run_list[i])[0]
+
 	#_____ SINGLE PLOTS ____
 	# loop over datasets, 8 channels + 1 sum
 
@@ -322,7 +338,7 @@ for i in range(0,len(run_list)):
 		## probability, N_pe-wise
 		# ax.plot(pe_val,df_prob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle="-",linewidth=1,ms=3,marker="s",label="dark count prob.\n$P(N_{{pe}}={:d})$ = {:1.1f} %".format(ch_npe_lim,df_prob.iloc[ch_npe_lim,(k+i*9)+1]*100),zorder=2)
 		## probability, cumulative
-		ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=3,marker="o",label=("dark count cum. prob.\n"+r"$P^{{\ast}}(N_{{pe}}{{\geq}}{:d})$ = {:1.1f} %".format(ch_npe_lim,df_cprob.iloc[ch_npe_lim,(k+i*9)+1]*100)),zorder=2)
+		ax.plot(pe_val,df_cprob.iloc[:,(k+1*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=3,marker="o",label=("dark count cum. prob.\n"+r"$P^{{\ast}}(N_{{pe}}{{\geq}}{:d})$ = {:1.1f} %".format(ch_npe_lim,df_cprob.iloc[ch_npe_lim,(k+1*9)+1]*100)),zorder=2)
 
 		# ax.set_title(single_fig_title,fontsize=10)
 		ax.set_xlabel("number-of-photoelectrons [$N_{pe}$]",fontsize=9)
@@ -383,7 +399,7 @@ for i in range(0,len(run_list)):
 		# ax.plot(pe_val,df_prob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle="-",linewidth=1,ms=3,marker="s",label="dark count prob.\n$P(N_{{pe}}={:d})$ = {:1.1f} %".format(ch_npe_lim,df_prob.iloc[ch_npe_lim,(k+i*9)+1]*100),zorder=2)
 		
 		## probability, cumulative
-		ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=3,marker="o",label=("dark count cum. prob.\n"+r"$P^{{\ast}}(N_{{pe}}{{\geq}}{:d})$ = {:1.1f} %".format(ch_npe_lim,df_cprob.iloc[ch_npe_lim,(k+i*9)+1]*100)),zorder=2)
+		ax.plot(pe_val,df_cprob.iloc[:,(k+1*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=3,marker="o",label=("dark count cum. prob.\n"+r"$P^{{\ast}}(N_{{pe}}{{\geq}}{:d})$ = {:1.1f} %".format(ch_npe_lim,df_cprob.iloc[ch_npe_lim,(k+1*9)+1]*100)),zorder=2)
 
 		ax.set_title(single_fig_title,fontsize=10)
 		ax.set_xlabel("number-of-photoelectrons [$N_{pe}$]",fontsize = 9)

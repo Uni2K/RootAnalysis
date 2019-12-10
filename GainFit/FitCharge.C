@@ -107,38 +107,34 @@ int main(int argc, char **argv)
   string wom_id = (string)argv[4];
   string sw_id = (string)argv[5];
   int n_peaks = atoi(argv[6]);
-  string fileLocation=string(argv[7]);
+  string fileLocation = string(argv[7]);
 
-
-
-	
   // __SETTINGS_____
 
-  n_peaks=6;
-  int fitLimitEnd=800; 
-  int fitLimitStart=-20; //40
+  n_peaks = 6;
+  int fitLimitEnd = 800;
+  int fitLimitStart = -20; //40
   int xmin = -50;
   int xmax = 800;
   int nBins = (xmax - xmin) * 1;
-  float range = 15; 
+  float range = 15;
   //VB59: 9,700,[-50,700], 15
-  
-   //Single Gauss Fit Range x2
+
+  //Single Gauss Fit Range x2
   // import/export directories & files
   //string root_dir = "../rootfiles/"; // root files
   // string root_dir = "../a_root_files/0_new_dynBL_noCalib_ampW50_intW25_scale0/"; // root files
-  //string in_dir = root_dir + run_name + ".root";   
-  string in_dir = fileLocation; // path to current root file
-                                  // path to current root file
-  string out_dir = Form("./calib_histograms/charge/%s/",run_name.c_str());                     // to export plots and values
-  string calib_factor_out_list = Form("calib_factor_run%d", run_nr); // filename
-  string BL_offset_out_list =  Form("BL_offset_run%d", run_nr);       // filename values list
+  //string in_dir = root_dir + run_name + ".root";
+  string in_dir = fileLocation;                                             // path to current root file
+                                                                            // path to current root file
+  string out_dir = Form("./calib_histograms/charge/%s/", run_name.c_str()); // to export plots and values
+  string calib_factor_out_list = Form("calib_factor_run%d", run_nr);        // filename
+  string BL_offset_out_list = Form("BL_offset_run%d", run_nr);              // filename values list
 
-  if (!fs::is_directory(out_dir) || !fs::exists(out_dir)) { // Check if src folder exists
-		fs::create_directory(out_dir); // create src folder
-	}
-
-
+  if (!fs::is_directory(out_dir) || !fs::exists(out_dir))
+  {                                // Check if src folder exists
+    fs::create_directory(out_dir); // create src folder
+  }
 
   // store results in .txt file
   string calib_list_filename = out_dir + calib_factor_out_list + ".txt";
@@ -165,7 +161,7 @@ int main(int argc, char **argv)
 
   // histogram settings
   // int nBins = 250;
- 
+
   // y-range of calib factor plot
   // double l_values = 28, u_values =48;
   double l_values = 5, u_values = 9;
@@ -272,24 +268,61 @@ int main(int argc, char **argv)
     }
     //ranges = {-20, 50, 120, 160, 220, 280, 330, 380, 440, 500, 550, 600, 660, 710, 770};
     //ranges = {-20, 40, 85, 140, 190, 240, 300, 350, 400, 450, 500, 550,600, 660, 710, 770};
-   // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835};
-   // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835}; GOOD FOR VB59
+    // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835};
+    // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835}; GOOD FOR VB59
 
-  //59V PCBD Tune86
-    //  ranges = {-20, 45, 80, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835};
-    //ranges = {-20, 25, 65, 100, 135, 170, 215, 255, 280,320, 485, 535, 585, 635,685, 735, 785, 835}; 
+    //Run 23
+ /*    ranges = {-20, 25, 65, 110, 155, 195, 235, 280};
+    n_peaks = 6;
+    fitLimitEnd = 500;
+    fitLimitStart = -40; //40
+    xmin = -50;
+    xmax = 600;
+    nBins = (xmax - xmin) * 1;
+    range = 12;
+ */
 
-    //DC 58 PCBA
-   // ranges = {-20, 30, 70, 120, 170};
+  //Run 26
+/*   ranges = {-20, 40, 100, 160, 215, 275, 330, 385};
+    n_peaks = 5;
+    fitLimitEnd = 600;
+    fitLimitStart = -40; //40
+    xmin = -50;
+    xmax = 600;
+    nBins = (xmax - xmin) * 1;
+    range = 12; */
 
-        ranges = {-20, 50, 115, 200, 270, 345, 420, 490, 280,320, 375, 420, 490, 550,620, 735, 785, 835}; 
+
+//Run 28
+  ranges = {-20, 25, 68, 120, 165, 210, 260, 305};
+    n_peaks = 5;
+    fitLimitEnd = 600;
+    fitLimitStart = -20; //40
+    xmin = -50;
+    xmax = 600;
+    nBins = (xmax - xmin) * 1;
+    range = 12; 
+
+  //Run 32
+ /* ranges = {-20, 25, 60, 100, 140, 180, 220,260};
+    n_peaks =5;
+    fitLimitEnd = 600;
+    fitLimitStart = -35; //40
+    xmin = -50;
+    xmax = 600;
+    nBins = (xmax - xmin) * 1;
+    range = 12;
+*/
+
+
+
 
 
 
 
 
     // open tree
-    cout<<"Doing: "<<in_dir<<endl;
+    cout << "Doing: " << in_dir << endl;
     TFile *file = new TFile(in_dir.c_str());
 
     TTree *tree;
@@ -321,10 +354,8 @@ int main(int argc, char **argv)
     h2 = (TH1F *)h->Clone();
     h2->GetXaxis()->SetRangeUser(xmin, xmax);
 
-
     //C2->SetLogy();
     //C1->SetLogy();
-
 
     /***** 
     __ PRE FIT - Single Gauss fits___________________________
@@ -406,8 +437,6 @@ int main(int argc, char **argv)
     double sig1 = f->GetParameter(4);
     double sig1_err = f->GetParError(4);
 
-
-
     TF1 *fCopy = new TF1("copy", fitf, -20, 1000, 7);
     fCopy->SetLineColor(kBlue);
     fCopy->SetLineStyle(2);
@@ -418,26 +447,15 @@ int main(int argc, char **argv)
     fCopy->SetParName(1, "#mu");
     fCopy->SetParameter(1, f->GetParameter(1));
     fCopy->SetParName(2, "#mu_{XT}");
-    fCopy->SetParameter(2,f->GetParameter(2));
+    fCopy->SetParameter(2, f->GetParameter(2));
     fCopy->SetParName(3, "#sigma_{0 p.e.}");
     fCopy->SetParameter(3, f->GetParameter(3));
     fCopy->SetParName(4, "#sigma_{1 p.e.}");
     fCopy->SetParameter(4, f->GetParameter(4));
     fCopy->SetParName(5, "Gain");
-    fCopy->SetParameter(5,f->GetParameter(5));
+    fCopy->SetParameter(5, f->GetParameter(5));
     fCopy->SetParName(6, "Base line");
     fCopy->SetParameter(6, f->GetParameter(6));
-
-
-
-
-
-
-
-
-
-
-
 
     /***** 
     __ ALTERNATIVE MULTI-GAUSS FIT ___________________________
