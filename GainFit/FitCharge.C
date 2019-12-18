@@ -294,31 +294,45 @@ int main(int argc, char **argv)
 
 
 //Run 28
-  ranges = {-20, 25, 68, 120, 165, 210, 260, 305};
+  /* ranges = {-20, 25, 68, 120, 165, 210, 260, 305};
     n_peaks = 5;
     fitLimitEnd = 600;
     fitLimitStart = -20; //40
     xmin = -50;
     xmax = 600;
     nBins = (xmax - xmin) * 1;
-    range = 12; 
+    range = 12; */
 
   //Run 32
- /* ranges = {-20, 25, 60, 100, 140, 180, 220,260};
+ /* ranges = {-20,15, 60, 80,105, 130, 160, 180,200,220,260};
     n_peaks =5;
-    fitLimitEnd = 600;
-    fitLimitStart = -35; //40
+    fitLimitEnd = 300;
+    fitLimitStart = -25; //40
     xmin = -50;
-    xmax = 600;
+    xmax = 400;
     nBins = (xmax - xmin) * 1;
-    range = 12;
+    range = 8;
 */
 
+  /*ranges = {-3, 4, 8, 13, 18, 23, 29, 34,39,45,51,56,61 };
+    n_peaks = 7;
+    fitLimitEnd = 50;
+    fitLimitStart = -2; //40
+    xmin = -10;
+    xmax = 80;
+    nBins = 500;
+    range = 1.5;
 
+*/
 
-
-
-
+  ranges = {  250,450,610,790,950,1100,1300,1450};
+    n_peaks = 6;
+    fitLimitEnd = 1400;
+    fitLimitStart = 250; //40
+    xmin = 20;
+    xmax = 1500;
+    nBins = (xmax - xmin) * 1;
+    range = 42; 
 
 
     // open tree
