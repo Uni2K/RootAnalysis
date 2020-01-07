@@ -325,14 +325,14 @@ int main(int argc, char **argv)
 
 */
 
-  ranges = {  250,450,610,790,950,1100,1300,1450};
-    n_peaks = 6;
-    fitLimitEnd = 1400;
-    fitLimitStart = 250; //40
-    xmin = 20;
-    xmax = 1500;
+ ranges = {-20,15, 60, 80,105, 130, 160, 180,200,220,260};
+    n_peaks =5;
+    fitLimitEnd = 300;
+    fitLimitStart = -25; //40
+    xmin = -50;
+    xmax = 600;
     nBins = (xmax - xmin) * 1;
-    range = 42; 
+    range = 8;
 
 
     // open tree
