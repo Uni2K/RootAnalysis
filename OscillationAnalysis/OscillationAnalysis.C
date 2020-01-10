@@ -173,6 +173,8 @@ int main(int argc, char *argv[])
 		npeaks = 0;
 		int p = 0;
 		Double_t *xpeaks = s->GetPositionX(); //array with X-positions of the centroids found by TSpectrum
+		cout << "xPEAKS" << xpeaks << endl;
+
 		for (p = 0; p < nfound; p++)
 		{
 			Double_t xp = xpeaks[p];
@@ -181,14 +183,16 @@ int main(int argc, char *argv[])
 			//Condition for valid peaks: height-sqrt(height) has to be greater than the bckgnd:
 			if (yp - TMath::Sqrt(yp) < fline->Eval(xp))
 				continue;
-			if(xp<(t_amp-100)){
-				cout<<"XP: "<<xp<<"  T_AMP: "<<t_amp<<endl;
+			if (xp < (t_amp - 100))
+			{
+				cout << "XP: " << xp << "  T_AMP: " << t_amp << endl;
 				continue;
-			}	
-			if(xp>(320)){
-				cout<<"XP2: "<<xp<<"  T_AMP: "<<t_amp<<endl;
+			}
+			if (xp > (320))
+			{
+				cout << "XP2: " << xp << "  T_AMP: " << t_amp << endl;
 				continue;
-			}	
+			}
 
 			par[3 * npeaks + 2] = yp; //height
 			par[3 * npeaks + 3] = xp; //centroid
@@ -232,17 +236,19 @@ int main(int argc, char *argv[])
 		float meanPeriodError = 0;
 		float means[npeaks];
 		for (j = 1; j <= npeaks; j++)
-		{cout <<j - 1<<"  "<< means[j - 1]<<endl;
+		{
 			means[j - 1] = par_single[1 + (j - 1) * 3];
-			float period = par_single[1 + (j)*3] - par_single[1 + (j - 1) * 3];
-			float periodError = sqrt(pow(meanError[j], 2) + pow(meanError[j - 1], 2));
-			periods[j - 1] = period;
-			periodErrors[j - 1] = periodError;
+			cout << j - 1 << "  " << means[j - 1] << endl;
 
-			h_leg->AddEntry((TObject *)0, Form("Period (%d-%d): %f +- %f", j - 1, j, period, periodError), "");
+			if (j < npeaks)
+			{
+				float period = par_single[1 + (j)*3] - par_single[1 + (j - 1) * 3];
+				float periodError = sqrt(pow(meanError[j], 2) + pow(meanError[j - 1], 2));
+				periods[j - 1] = period;
+				periodErrors[j - 1] = periodError;
+				h_leg->AddEntry((TObject *)0, Form("Period (%d-%d): %f +- %f", j - 1, j, period, periodError), "");
+			}
 		}
-
-    	
 
 		float minSearchLeft = 1000;
 		float minSearchRight = 1000;
@@ -251,21 +257,19 @@ int main(int argc, char *argv[])
 		{
 			meanPeriod = meanPeriod + periods[j];
 			meanPeriodError = meanPeriodError + pow(periodErrors[j], 2) + pow(periodErrors[j - 1], 2);
-			if (means[j] < minSearchLeft )
+			if (means[j] < minSearchLeft)
 			{
 				minSearchLeft = means[j];
-
 			}
 			else if (means[j] < minSearchRight)
 			{
 				minSearchRight = means[j];
-
-			}else{
-
+			}
+			else
+			{
 			}
 		}
 
-		
 		//WITHOUT STATISTICS ERROR
 		meanPeriod = meanPeriod / (npeaks - 1);
 		meanPeriodError = sqrt(meanPeriodError) / sqrt((npeaks - 1));
@@ -273,21 +277,35 @@ int main(int argc, char *argv[])
 		h_leg->AddEntry((TObject *)0, Form("Mean Period: %f +- %f", meanPeriod, meanPeriodError), "");
 
 		//Find first Minimum -> Search Between 0,1 Maxima
-		/*	TF1 *putc = new TF1("inversepeak", "-sqrt([0]^2)*exp(-0.5*((x-[1])/[2])^2)", par_single[1 + 3]-20, par_single[1 + 3]-10);
-			putc ->SetParameter(0,10);
-			putc ->SetParameter(1,155);
-			putc ->SetParameter(2,5);
+		//	TF1 *putc = new TF1("inversepeak", "-sqrt([0]^2)*exp(-0.5*((x-[1])/[2])^2)+[3]", par_single[1 + 3]-20, par_single[1 + 3]);
+		if (npeaks > 1)
+		{
+			TF1 *putc = new TF1("inversepeak", "pol4", par_single[1 + 3] - 20, par_single[1 + 3]);
+			putc->SetLineColor(kGreen);
+			putc->SetParameter(0, 10);
+			putc->SetParameter(1, 155);
+			putc->SetParameter(2, 5);
 			sumHist->Fit("inversepeak", "RQ+");
-			putc->Draw("same");*/
-		float minInRange = t_min_inRange(sumHist, minSearchLeft, minSearchRight);
+			putc->Draw("same");
+		
+		//	float minInRange = t_min_inRange(sumHist, minSearchLeft, minSearchRight);
+		float minInRange = sumHist->GetFunction("inversepeak")->GetMinimumX(par_single[1 + 3] - 20, par_single[1 + 3]);
 
 		TLine *minLine = new TLine(minInRange, minY, minInRange, maxY);
 		minLine->SetLineColor(3);
 		minLine->SetLineWidth(1);
 		minLine->Draw();
+
+		float entireSignalRight = 3 * meanPeriod + minInRange;
+		TLine *entireSignalRightLine = new TLine(entireSignalRight, minY, entireSignalRight, maxY);
+		entireSignalRightLine->SetLineColor(7);
+		entireSignalRightLine->SetLineWidth(1);
+		entireSignalRightLine->Draw();
+
+
 		h_leg->AddEntry((TObject *)0, Form("First Minimum: %f", minInRange), "");
 		h_leg->AddEntry((TObject *)0, Form("Distance to max: %f", (minInRange - means[0])), "");
-
+		}
 		h_leg->Draw();
 	}
 
