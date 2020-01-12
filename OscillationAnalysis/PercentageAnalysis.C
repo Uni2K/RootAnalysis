@@ -36,6 +36,7 @@
 #include <TGraph.h>
 #include "TSpectrum.h"
 #include "TVirtualFitter.h"
+#include "TPaveStats.h"
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
@@ -88,12 +89,13 @@ int main(int argc, char *argv[])
 	{
 		channelNumber = 32;
 	}
+	gStyle->SetOptFit(0000);
 
 	for (int i = 0; i < channelNumber; ++i)
 	{
 		C1->cd(i + 1);
 
-		int xmin = -1;
+		int xmin = 0.5;
 		int xmax = 1;
 		int nBins = 100;
 
@@ -104,6 +106,17 @@ int main(int argc, char *argv[])
 
 		TString cut("");
 		tree->Draw(Form("IntegralDifference[%d]>>h", i), cut);
+		TF1 *gauss=new TF1("peak", "gaus",0, 1);
+
+		h->Fit("peak", "RQ+");
+	
+		TLegend *h_leg = new TLegend(0.1, 0.81, 0.35, 0.9);
+		h_leg->SetTextSize(0.03);
+		double mean=gauss->GetParameter(1);
+		h_leg->AddEntry(gauss, Form("Mean: %lf", mean));
+		h_leg->Draw();
+
+
 	}
 
 	C1->Print((out_dir + run_name + ".pdf").c_str());

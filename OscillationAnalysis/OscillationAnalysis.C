@@ -305,6 +305,9 @@ int main(int argc, char *argv[])
 
 		h_leg->AddEntry((TObject *)0, Form("First Minimum: %f", minInRange), "");
 		h_leg->AddEntry((TObject *)0, Form("Distance to max: %f", (minInRange - means[0])), "");
+		h_leg->AddEntry((TObject *)0, Form("Distance to end: %f", (entireSignalRight-means[0])), "");
+
+
 		}
 		h_leg->Draw();
 	}
