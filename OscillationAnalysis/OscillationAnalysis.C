@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	string run_name = (string)argv[1];
 	int run_nr = atoi(argv[2]);
 	string in_dir = string(argv[3]);
-
+gErrorIgnoreLevel = kError;
 	string out_dir = Form("./oscillation_histograms/%s/", run_name.c_str());
 	if (!fs::is_directory("./oscillation_histograms") || !fs::exists("./oscillation_histograms"))
 	{
@@ -173,7 +173,6 @@ int main(int argc, char *argv[])
 		npeaks = 0;
 		int p = 0;
 		Double_t *xpeaks = s->GetPositionX(); //array with X-positions of the centroids found by TSpectrum
-		cout << "xPEAKS" << xpeaks << endl;
 
 		for (p = 0; p < nfound; p++)
 		{
@@ -185,12 +184,10 @@ int main(int argc, char *argv[])
 				continue;
 			if (xp < (t_amp - 100))
 			{
-				cout << "XP: " << xp << "  T_AMP: " << t_amp << endl;
 				continue;
 			}
 			if (xp > (320))
 			{
-				cout << "XP2: " << xp << "  T_AMP: " << t_amp << endl;
 				continue;
 			}
 
@@ -206,7 +203,7 @@ int main(int argc, char *argv[])
 		//printf("Parameters No 4+3*n ---> Gauss Means\n");
 		//printf("Parameters No 5+3*n ---> Gauss Sigmas\n");
 
-		TLegend *h_leg = new TLegend(0.65, 0.65, 0.99, 0.9);
+		TLegend *h_leg = new TLegend(0.55, 0.65, 0.99, 0.9);
 		h_leg->SetTextSize(0.02);
 
 		TF1 *peak_single[npeaks];
@@ -229,16 +226,20 @@ int main(int argc, char *argv[])
 			peak_single[i]->GetParameters(&par_single[3 * i]);
 		}
 
+
+
+
 		int j = 0;
 		float periods[npeaks - 1];
 		float periodErrors[npeaks - 1];
 		float meanPeriod = 0;
 		float meanPeriodError = 0;
+		float meanPeriodStdD = 0;
+
 		float means[npeaks];
 		for (j = 1; j <= npeaks; j++)
 		{
 			means[j - 1] = par_single[1 + (j - 1) * 3];
-			cout << j - 1 << "  " << means[j - 1] << endl;
 
 			if (j < npeaks)
 			{
@@ -246,9 +247,12 @@ int main(int argc, char *argv[])
 				float periodError = sqrt(pow(meanError[j], 2) + pow(meanError[j - 1], 2));
 				periods[j - 1] = period;
 				periodErrors[j - 1] = periodError;
-				h_leg->AddEntry((TObject *)0, Form("Period (%d-%d): %f +- %f", j - 1, j, period, periodError), "");
+				//h_leg->AddEntry((TObject *)0, Form("Period (%d-%d): %f +- %f", j - 1, j, period, periodError), "");
 			}
 		}
+
+		h_leg->AddEntry((TObject *)0, Form("Amplitude %f +- %f", means[0], meanError[0]), "");
+
 
 		float minSearchLeft = 1000;
 		float minSearchRight = 1000;
@@ -270,10 +274,19 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		//WITHOUT STATISTICS ERROR
 		meanPeriod = meanPeriod / (npeaks - 1);
-		meanPeriodError = sqrt(meanPeriodError) / sqrt((npeaks - 1));
 
+		for (j = 0; j < npeaks; j++)
+		{
+			meanPeriodStdD = meanPeriodStdD + pow(meanPeriod - periods[j], 2);
+		}
+		meanPeriodStdD = sqrt(meanPeriodStdD / (npeaks - 1));
+		float statisticalMeanPeriodError = meanPeriodStdD / sqrt((npeaks - 1));
+		float systematicMeanPeriodError = sqrt(meanPeriodError) / sqrt((npeaks - 1));
+		//meanPeriodError = sqrt(pow(statisticalMeanPeriodError, 2) + pow(systematicMeanPeriodError, 2));
+		meanPeriodError = sqrt( pow(systematicMeanPeriodError, 2));
+
+		cout<<"Statistical Error: "<<statisticalMeanPeriodError<<" Systematic Error: "<<systematicMeanPeriodError<<" Combined Error: "<<meanPeriodError<<endl;;
 		h_leg->AddEntry((TObject *)0, Form("Mean Period: %f +- %f", meanPeriod, meanPeriodError), "");
 
 		//Find first Minimum -> Search Between 0,1 Maxima
@@ -287,32 +300,61 @@ int main(int argc, char *argv[])
 			putc->SetParameter(2, 5);
 			sumHist->Fit("inversepeak", "RQ+");
 			putc->Draw("same");
-		
-		//	float minInRange = t_min_inRange(sumHist, minSearchLeft, minSearchRight);
-		float minInRange = sumHist->GetFunction("inversepeak")->GetMinimumX(par_single[1 + 3] - 20, par_single[1 + 3]);
 
-		TLine *minLine = new TLine(minInRange, minY, minInRange, maxY);
-		minLine->SetLineColor(3);
-		minLine->SetLineWidth(1);
-		minLine->Draw();
+			//	float minInRange = t_min_inRange(sumHist, minSearchLeft, minSearchRight);
+			float minInRange = sumHist->GetFunction("inversepeak")->GetMinimumX(par_single[1 + 3] - 20, par_single[1 + 3]);
+			float minInRangeError=320.0/(sumHist->GetNbinsX());
+			TLine *minLine = new TLine(minInRange, minY, minInRange, maxY);
+			minLine->SetLineColor(3);
+			minLine->SetLineWidth(1);
+			minLine->Draw();
 
-		float entireSignalRight = 3 * meanPeriod + minInRange;
-		TLine *entireSignalRightLine = new TLine(entireSignalRight, minY, entireSignalRight, maxY);
-		entireSignalRightLine->SetLineColor(7);
-		entireSignalRightLine->SetLineWidth(1);
-		entireSignalRightLine->Draw();
+			float entireSignalRight = 3 * meanPeriod + minInRange;
+			TLine *entireSignalRightLine = new TLine(entireSignalRight, minY, entireSignalRight, maxY);
+			entireSignalRightLine->SetLineColor(7);
+			entireSignalRightLine->SetLineWidth(1);
+			entireSignalRightLine->Draw();
 
 
-		h_leg->AddEntry((TObject *)0, Form("First Minimum: %f", minInRange), "");
-		h_leg->AddEntry((TObject *)0, Form("Distance to max: %f", (minInRange - means[0])), "");
-		h_leg->AddEntry((TObject *)0, Form("Distance to end: %f", (entireSignalRight-means[0])), "");
+		TLine *leftLine = new TLine(means[0]-20, minY, means[0]-20, maxY);
+			leftLine->SetLineColor(6);
+			leftLine->SetLineWidth(1);
+			leftLine->Draw();
+
+
+
+		//	h_leg->AddEntry((TObject *)0, Form("First Minimum: %f +- %f", minInRange, minInRangeError), "");
+		//	h_leg->AddEntry((TObject *)0, Form("Distance to max: %f", (minInRange - means[0])), "");
+		//	h_leg->AddEntry((TObject *)0, Form("Distance to end: %f", (entireSignalRight - means[0])), "");
+
+			float allSignalError=sqrt(pow(3* meanPeriodError,2)+pow(meanError[0],2));
+
+		h_leg->AddEntry((TObject *)0, Form("Left %f +- %f",means[0]-20, meanError[0]), "");
+		h_leg->AddEntry((TObject *)0, Form("Signal %f +- %f",minInRange, minInRangeError), "");
+		h_leg->AddEntry((TObject *)0, Form("All %f +- %f",entireSignalRight, allSignalError), "");
+
+		h_leg->AddEntry((TObject *)0, Form("Interval w/o Errors [%f,%f]",-20.0, minInRange-means[0]), "");
+		h_leg->AddEntry((TObject *)0, Form("Interval w Errors [%f,%f]",-(20+meanError[0]), (minInRange-means[0])+minInRangeError), "");
+
+
+
+
+
+
+
 
 
 		}
 		h_leg->Draw();
+
+
+
+
 	}
 
 	C1->Print((out_dir + run_name + ".pdf").c_str());
+
+
 
 	return 0;
 }

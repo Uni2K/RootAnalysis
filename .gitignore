@@ -44,3 +44,6 @@ Kalibration/Changes.txt
 Kalibration/Info.txt
 Kalibration/Auswertung/src/calibration_amp.txt
 Kalibration/Auswertung/src/calibration_charge.txt
+OscillationAnalysis/percentage_histograms/102_calib_vb58_tune84_pcbc/102_calib_vb58_tune84_pcbc_IntegralCorrection.txt
+OscillationAnalysis/percentage_histograms/104_calib_vb58_tune85_pcbc/104_calib_vb58_tune85_pcbc_IntegralCorrection.txt
+OscillationAnalysis/percentage_histograms/

@@ -91,6 +91,11 @@ int main(int argc, char *argv[])
 	}
 	gStyle->SetOptFit(0000);
 
+
+	vector<float> meanValues; 
+	vector<float> meanValuesCalibration(32); 
+	vector<float> correctionValues; 
+
 	for (int i = 0; i < channelNumber; ++i)
 	{
 		C1->cd(i + 1);
@@ -106,20 +111,44 @@ int main(int argc, char *argv[])
 
 		TString cut("");
 		tree->Draw(Form("IntegralDifference[%d]>>h", i), cut);
-		TF1 *gauss=new TF1("peak", "gaus",0, 1);
-
-		h->Fit("peak", "RQ+");
+	
+	//	TF1 *gauss=new TF1("peak", "gaus",0, 1);
+	//	h->Fit("peak", "RQ+");
 	
 		TLegend *h_leg = new TLegend(0.1, 0.81, 0.35, 0.9);
 		h_leg->SetTextSize(0.03);
-		double mean=gauss->GetParameter(1);
-		h_leg->AddEntry(gauss, Form("Mean: %lf", mean));
+
+		double mean=h->GetMean();
+		TLine *meanLine= new TLine(mean, 0, mean, h->GetMaximum()*1.1);
+		meanLine->SetLineColor(2);
+		meanLine->Draw();
+		//double mean=gauss->GetParameter(1);
+		h_leg->AddEntry((TObject *)0, Form("Mean: %lf", mean),"");
+	
+
 		h_leg->Draw();
-
-
+		meanValues.push_back(mean);
+		correctionValues.push_back(meanValuesCalibration[i]/mean);
 	}
 
 	C1->Print((out_dir + run_name + ".pdf").c_str());
+
+	string filename = out_dir + run_name + "_IntegralCorrection.txt";
+
+	FILE *valuesList= fopen(filename.c_str(), "a");
+
+
+  	for (int i = 0; i < channelNumber; ++i)
+  	{
+    fprintf(valuesList, "%f,", meanValues[i]);
+  	}
+
+
+
+
+
+
+
 
 	return 0;
 }
