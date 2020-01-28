@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+cd "${0%/*}"
+cwd=`pwd`
+
+
 #################
 ### COMPILE   ###
 #################
@@ -10,7 +15,7 @@ g++ BaselineAverage.C `root-config --libs --cflags` -o BL_average_new
 ### INITIALIZE ###
 ##################
 
-cwd=`pwd`
+
 
 hist_dir="BL_histograms"
 

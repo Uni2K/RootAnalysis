@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "PercentageAnalysis.C": "cpp",
+        "IntegrationWindowAnalysis.C": "cpp",
+        "iostream": "cpp",
+        "read.C": "cpp",
+        "mergeROOTFiles.C": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "filesystem": "cpp",
+        "FitCharge.C": "cpp",
+        "analysis.C": "cpp",
+        "BaselineAverage.C": "cpp",
+        "chrono": "cpp",
+        "ostream": "cpp",
+        "misc.C": "cpp"
+    }
+}

@@ -83,6 +83,7 @@ Double_t alt_f(Double_t *x, Double_t *p)
 __ FIT ROUTINE______
 ********************/
 
+bool light = true;
 int main(int argc, char **argv)
 {
   ::g_argc = argc;
@@ -141,8 +142,8 @@ int main(int argc, char **argv)
   string BL_offset_list_filename = out_dir + BL_offset_out_list + ".txt";
   FILE *calib_factor_list;
   FILE *BL_offset_factor_list;
-  calib_factor_list = fopen(calib_list_filename.c_str(), "a");
-  BL_offset_factor_list = fopen(BL_offset_list_filename.c_str(), "a");
+  calib_factor_list = fopen(calib_list_filename.c_str(), "w");
+  BL_offset_factor_list = fopen(BL_offset_list_filename.c_str(), "w");
 
   // print date to file
   time_t now;
@@ -272,7 +273,7 @@ int main(int argc, char **argv)
     // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835}; GOOD FOR VB59
 
     //Run 23
- /*    ranges = {-20, 25, 65, 110, 155, 195, 235, 280};
+    /*    ranges = {-20, 25, 65, 110, 155, 195, 235, 280};
     n_peaks = 6;
     fitLimitEnd = 500;
     fitLimitStart = -40; //40
@@ -282,8 +283,8 @@ int main(int argc, char **argv)
     range = 12;
  */
 
-  //Run 26
-/*   ranges = {-20, 40, 100, 160, 215, 275, 330, 385};
+    //Run 26
+    /*   ranges = {-20, 40, 100, 160, 215, 275, 330, 385};
     n_peaks = 5;
     fitLimitEnd = 600;
     fitLimitStart = -40; //40
@@ -292,9 +293,8 @@ int main(int argc, char **argv)
     nBins = (xmax - xmin) * 1;
     range = 12; */
 
-
-//Run 28
-  /* ranges = {-20, 25, 68, 120, 165, 210, 260, 305};
+    //Run 28
+    /* ranges = {-20, 25, 68, 120, 165, 210, 260, 305};
     n_peaks = 5;
     fitLimitEnd = 600;
     fitLimitStart = -20; //40
@@ -303,8 +303,8 @@ int main(int argc, char **argv)
     nBins = (xmax - xmin) * 1;
     range = 12; */
 
-  //Run 32
- /* ranges = {-20,15, 60, 80,105, 130, 160, 180,200,220,260};
+    //Run 32
+    /* ranges = {-20,15, 60, 80,105, 130, 160, 180,200,220,260};
     n_peaks =5;
     fitLimitEnd = 300;
     fitLimitStart = -25; //40
@@ -314,7 +314,7 @@ int main(int argc, char **argv)
     range = 8;
 */
 
-  /*ranges = {-3, 4, 8, 13, 18, 23, 29, 34,39,45,51,56,61 };
+    /*ranges = {-3, 4, 8, 13, 18, 23, 29, 34,39,45,51,56,61 };
     n_peaks = 7;
     fitLimitEnd = 50;
     fitLimitStart = -2; //40
@@ -325,15 +325,174 @@ int main(int argc, char **argv)
 
 */
 
- ranges = {-20,15, 60, 80,105, 130, 160, 180,200,220,260};
-    n_peaks =5;
-    fitLimitEnd = 300;
-    fitLimitStart = -25; //40
-    xmin = -50;
-    xmax = 600;
-    nBins = (xmax - xmin) * 1;
-    range = 8;
+    //Run 7 -> the one I used for Master Thesis: 7_calib_vb58_tune8700_pcbd
+    switch (channel)
+    {
+    case 0:
+      //COMMENTED: DYN BL
 
+      /* ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 255;
+      fitLimitStart = 34; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.2;
+      range = 6;*/
+
+      ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 225;
+      fitLimitStart = 33; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.405;
+      range = 10;
+
+      //GOOD RESULTS
+      break;
+    case 1:
+      /*   ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 225;
+      fitLimitStart = 39; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.2;
+      range = 10;*/
+
+      ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 225;
+      fitLimitStart = 39; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.32;
+      range = 10;
+
+      break;
+    case 2:
+      /*   ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 225;
+      fitLimitStart = 39; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.3;
+      range = 10;*/
+
+      ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 230;
+      fitLimitStart = 32; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.2999;
+      range = 10;
+
+      break;
+
+    case 3:
+      /*  ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 261;
+      fitLimitStart = 40; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.2043;
+      range = 6;*/
+
+      ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 236;
+      fitLimitStart = 36; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.2054;
+      range = 6;
+
+      break;
+    case 4:
+      /* ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 261;
+      fitLimitStart = 39; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.2;
+      range = 6;*/
+
+      ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 226;
+      fitLimitStart = 34; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.5;
+      range = 6;
+
+      break;
+    case 5:
+      /*    ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 257;
+      fitLimitStart = 40; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) *2;
+      range = 10;*/
+
+      ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 240;
+      fitLimitStart = 37; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.999;
+      range = 10;
+
+      break;
+    case 6:
+      /*  ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
+      n_peaks = 5;
+      fitLimitEnd = 251;
+      fitLimitStart = 41; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.201;
+      range = 10;*/
+
+      ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
+      n_peaks = 5;
+      fitLimitEnd = 253;
+      fitLimitStart = 41; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.90;
+      range = 10;
+
+      break;
+    case 7:
+      /*  ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
+      n_peaks = 5;
+      fitLimitEnd = 251;
+      fitLimitStart = 41; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.201;
+      range = 10;*/
+
+      ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
+      n_peaks = 5;
+      fitLimitEnd = 246;
+      fitLimitStart = 42; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 1.2027;
+      range = 10;
+
+      break;
+    }
 
     // open tree
     cout << "Doing: " << in_dir << endl;
@@ -362,6 +521,7 @@ int main(int argc, char **argv)
     TString cut("");
     tree->Draw(Form("Integral[%d]>>h", channel), cut);
 
+    h->Smooth(0);
     // to show alternative fit
     TCanvas *C2 = new TCanvas("C2", "alt fit", 1000, 800);
     TH1F *h2 = new TH1F("h2", "", nBins, xmin, xmax);
@@ -396,7 +556,14 @@ int main(int argc, char **argv)
       peak_single[i] = new TF1("peak", "gaus", pos_peak[i] - range, pos_peak[i] + range);
       peak_single[i]->SetParameter(2, 10);
       peak_single[i]->SetParameter(1, pos_peak[i]);
-      h->Fit("peak", "RQ+");
+      if (!light)
+        h->Fit("peak", "RQ+");
+      else
+      {
+        peak_single[i]->SetBit(TF1::kNotDraw);
+
+        h->Fit("peak", "RQ");
+      }
       peak_single[i]->GetParameters(&par_single[0 + 3 * i]);
     }
 
@@ -429,8 +596,10 @@ int main(int argc, char **argv)
     f->SetParName(6, "Base line");
     f->SetParameter(6, par_single[1]);
 
-    h->Fit("fitf", "RMQ+");
-
+    if (!light)
+      h->Fit("fitf", "RMQ");
+    else
+      h->Fit("fitf", "RMQ+");
     // C1->cd();
     // h->Draw("sameFUNC");
 
@@ -492,7 +661,8 @@ int main(int argc, char **argv)
       alt->SetParameter(2 + 3 * j, sqrt(sig0 * sig0 + j * sig1 * sig1));
     }
 
-    h2->Fit("alt", "RQM");
+    if (!light)
+      h2->Fit("alt", "RQM");
 
     h2->GetYaxis()->SetTitle("entries");
     h2->GetXaxis()->SetTitle("pulse-height(charge) [mV #times ns]");
@@ -518,14 +688,19 @@ int main(int argc, char **argv)
       f_s[i]->SetLineColorAlpha(kRed, 0.4);
       f_s[i]->SetLineStyle(2);
       f_s[i]->SetNpx(1000);
-      f_s[i]->Draw("same");
+      if (!light)
+        f_s[i]->Draw("same");
     }
-    fCopy->Draw("same");
-    alt->Draw("same");   // draw fit above individual fit graphs
+    if (!light)
+    {
+      fCopy->Draw("same");
+      alt->Draw("same"); // draw fit above individual fit graphs
+    }
     h->Draw("FUNCsame"); // also draw GP fit
 
     masterCanvas->cd(i + 1);
-    alt->Draw("same");   // draw fit above individual fit graphs
+    if (!light)
+      alt->Draw("same"); // draw fit above individual fit graphs
     h->Draw("FUNCsame"); // also draw GP fit
 
     C2->cd();
@@ -537,20 +712,29 @@ int main(int argc, char **argv)
     h_leg->SetTextSize(0.02);
     h_leg->AddEntry(h2, Form("#bf{data}"), "lpef");
     h_leg->AddEntry((TObject *)0, Form("entries: %1.0f", h2->GetEntries()), "");
-    h_leg->AddEntry((TObject *)0, Form("integration window 25 ns"), "");
-    h_leg->AddEntry(f, Form("Generalized Poisson #times Gaussian fit"), "l");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("integration window 25 ns"), "");
+    if (!light)
+      h_leg->AddEntry(f, Form("Generalized Poisson #times Gaussian fit"), "l");
     h_leg->AddEntry((TObject *)0, Form("#chi^{2}/ndf = %1.2f", GP_chi2_ndof), "");
-    h_leg->AddEntry((TObject *)0, Form("N = %1.f #pm %1.f", norm, norm_err), "");
-    h_leg->AddEntry((TObject *)0, Form("#mu = %1.2f #pm %1.2f", mu, mu_err), "");
-    h_leg->AddEntry((TObject *)0, Form("#lambda = %1.3f #pm %1.3f", mu_xt, mu_xt_err), "");
-    h_leg->AddEntry((TObject *)0, Form("#sigma_{0} = %1.5f #pm %1.5f", sig0, sig0_err), "");
-    h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.5f #pm %1.5f", sig1, sig1_err), "");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("N = %1.f #pm %1.f", norm, norm_err), "");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("#mu = %1.2f #pm %1.2f", mu, mu_err), "");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("#lambda = %1.3f #pm %1.3f", mu_xt, mu_xt_err), "");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("#sigma_{0} = %1.5f #pm %1.5f", sig0, sig0_err), "");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.5f #pm %1.5f", sig1, sig1_err), "");
     h_leg->AddEntry((TObject *)0, Form("G_{fit,charge} = %1.5f #pm %1.5f", calib_factor, calib_factor_err), "");
     h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
-    h_leg->AddEntry(alt, Form("multi-Gaussian fit"), "l");
-    h_leg->AddEntry((TObject *)0, Form("#chi^{2}/ndf = %1.2f", gauss_chi2_ndof), "");
-    h_leg->AddEntry(f_s[1], Form("multi-Gaussian fit, individual peaks"), "l");
-
+    if (!light)
+    {
+      h_leg->AddEntry(alt, Form("multi-Gaussian fit"), "l");
+      h_leg->AddEntry((TObject *)0, Form("#chi^{2}/ndf = %1.2f", gauss_chi2_ndof), "");
+      h_leg->AddEntry(f_s[1], Form("multi-Gaussian fit, individual peaks"), "l");
+    }
     h_leg->Draw();
     masterCanvas->cd(i + 1);
     h_leg->Draw();
@@ -736,7 +920,8 @@ int main(int argc, char **argv)
     gErrorIgnoreLevel = kError; // suppress root terminal output
     // C1->Print(pdf_filename1.c_str());
     C2->Print(pdf_filename2.c_str());
-    C3->Print(pdf_filename3.c_str());
+    if (!light)
+      C3->Print(pdf_filename3.c_str());
     gErrorIgnoreLevel = kUnset;
 
     delete C1;
@@ -783,50 +968,53 @@ int main(int argc, char **argv)
     printf("\n");
   }
 
-  fprintf(calib_factor_list, "calib factor:\n");
+  fprintf(calib_factor_list, "%s={", run_name.c_str());
   for (int i = 0; i < 8; ++i)
   {
-    fprintf(calib_factor_list, "%f,", calib_factor_vec[i]);
+    fprintf(calib_factor_list, "%f/%f,", calib_factor_vec[i], calib_factor_err_vec[i]);
   }
-  fprintf(calib_factor_list, "\n");
+  fprintf(calib_factor_list, "}\n");
 
-  fprintf(calib_factor_list, "calib factor, statistical error:\n");
-  for (int i = 0; i < 8; ++i)
+  if (!light)
   {
-    fprintf(calib_factor_list, "%f,", calib_factor_err_vec[i]);
-  }
-  fprintf(calib_factor_list, "\n");
+    fprintf(calib_factor_list, "calib factor, statistical error:\n");
+    for (int i = 0; i < 8; ++i)
+    {
+      fprintf(calib_factor_list, "%f,", calib_factor_err_vec[i]);
+    }
+    fprintf(calib_factor_list, "\n");
 
-  fprintf(calib_factor_list, "calib factor, relative stat+sys error:\n");
-  for (int i = 0; i < 8; ++i)
-  {
-    fprintf(calib_factor_list, "%f,", calib_factor_rel_err_vec[i]);
-  }
-  fprintf(calib_factor_list, "\n");
+    fprintf(calib_factor_list, "calib factor, relative stat+sys error:\n");
+    for (int i = 0; i < 8; ++i)
+    {
+      fprintf(calib_factor_list, "%f,", calib_factor_rel_err_vec[i]);
+    }
+    fprintf(calib_factor_list, "\n");
 
-  fprintf(calib_factor_list, "calib fit, reduced chi2:\n");
-  for (int i = 0; i < 8; ++i)
-  {
-    fprintf(calib_factor_list, "%f,", calib_fit_rchi2_vec[i]);
-  }
-  fprintf(calib_factor_list, "\n");
+    fprintf(calib_factor_list, "calib fit, reduced chi2:\n");
+    for (int i = 0; i < 8; ++i)
+    {
+      fprintf(calib_factor_list, "%f,", calib_fit_rchi2_vec[i]);
+    }
+    fprintf(calib_factor_list, "\n");
 
-  fprintf(BL_offset_factor_list, "baseline offset:\n");
-  for (int i = 0; i < 8; ++i)
-  {
-    fprintf(BL_offset_factor_list, "%f,", BL_offset_vec[i]);
-  }
-  fprintf(BL_offset_factor_list, "\n");
+    fprintf(BL_offset_factor_list, "baseline offset:\n");
+    for (int i = 0; i < 8; ++i)
+    {
+      fprintf(BL_offset_factor_list, "%f,", BL_offset_vec[i]);
+    }
+    fprintf(BL_offset_factor_list, "\n");
 
-  fprintf(BL_offset_factor_list, "baseline offset, error:\n");
-  for (int i = 0; i < 8; ++i)
-  {
-    fprintf(BL_offset_factor_list, "%f,", BL_offset_err_vec[i]);
+    fprintf(BL_offset_factor_list, "baseline offset, error:\n");
+    for (int i = 0; i < 8; ++i)
+    {
+      fprintf(BL_offset_factor_list, "%f,", BL_offset_err_vec[i]);
+    }
+    fprintf(BL_offset_factor_list, "\n");
+    fclose(BL_offset_factor_list);
   }
-  fprintf(BL_offset_factor_list, "\n");
 
   fclose(calib_factor_list);
-  fclose(BL_offset_factor_list);
 
   string parent_dir = "./calib_histograms/charge/";
   string target_dir = parent_dir + run_name + "/";

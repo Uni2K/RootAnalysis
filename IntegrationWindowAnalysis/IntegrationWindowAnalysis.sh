@@ -3,13 +3,13 @@
 #################
 ### COMPILE   ###
 #################
+cd "${0%/*}"
 
-g++ PercentageAnalysis.C -lstdc++fs `root-config --libs --cflags` -o PercentageAnalysis -lSpectrum
+g++ IntegrationWindowAnalysis.C -lstdc++fs `root-config --libs --cflags` -o IntegrationWindow -lSpectrum 
 
 ##################
 ### INITIALIZE ###
 #################
-
 
  for file in "../rootfiles/"/*; do
 	#without extension
@@ -34,7 +34,7 @@ g++ PercentageAnalysis.C -lstdc++fs `root-config --libs --cflags` -o PercentageA
 	runNr=$(echo "$runName" | sed -r 's/^([^.]+).*$/\1/; s/^[^0-9]*([0-9]+).*$/\1/')
 	
 
-	./PercentageAnalysis $runName $runNr $rootFilePath
+	./IntegrationWindow $runName $runNr $rootFilePath 
 done
  
 
