@@ -128,6 +128,8 @@ int main(int argc, char *argv[]){
 	bool is_charge = 1;	
 	// store results
 	bool store_result = 1;
+	bool legend=false;
+
 
 	TApplication * ROOTapp;
 	if (is_interactive){ROOTapp = new TApplication("ROOT interactive", &argc, argv);}
@@ -242,6 +244,9 @@ int main(int argc, char *argv[]){
 
 		tree->Draw(draw_cmnd1,cut_cmnd1,"HISTE");
 
+
+		
+	
 		/***** 
 		__ Maximum in range_________________
 		*****/
@@ -318,7 +323,7 @@ int main(int argc, char *argv[]){
 		h_lan_leg->AddEntry((TObject*)0,Form("#chi^{2}/ndf = %1.1f",rchi2_g),"");
 		h_lan_leg->AddEntry(ln_gauss_mpv,Form("MPV = %1.2f #pm %1.2f ",peak[i],peak_err[i]),"l");
 		h_lan_leg->AddEntry((TObject*)0,Form("#sigma = %1.2f #pm %1.2f",sigma_g,sigma_g_err),"");
-		h_lan_leg->Draw();
+		if(legend) h_lan_leg->Draw();
 
 
 		/***** 
@@ -367,6 +372,8 @@ int main(int argc, char *argv[]){
 		// h_lan_leg->AddEntry(ln_gauss_mpv,Form("MPV_{G} = %1.2f #pm %1.2f ",peak[i],peak_err[i]),"l");
 		// h_lan_leg->AddEntry((TObject*)0,Form("#sigma_{G} = %1.2f #pm %1.2f ",sigma_g,sigma_g_err),"");
 		// h_lan_leg->Draw();
+		
+		
 
 
 		// print results

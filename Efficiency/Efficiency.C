@@ -192,10 +192,25 @@ int main(int argc, char *argv[])
 
 	//effCanvas->Divide(1,2);
 
-	int bins = 400;
-	int maxX = 4500;
-	int min = -100;
 
+	bool zoomMode=false;
+	int numberToScaleUp=10010;
+
+	float dcBinSize = 0.1;
+
+	int maxX = 4500;
+	
+	int min = -100;
+	
+	int numberOfNPE=maxX-min;
+	int bins = numberOfNPE*(1.0/dcBinSize); //0.1 Photoelectron
+	bins=450;
+
+	if(zoomMode){
+		bins=50;
+		maxX=60;
+		min=-10;
+	}
 	float threshold = -1;
 	float thresholdErrorP = -1;
 	float thresholdErrorM = -1;
@@ -279,7 +294,6 @@ int main(int argc, char *argv[])
 		//float sumPercentageDeviation = max(abs(sumPercentageErrorP - sumPercentage), abs(sumPercentageErrorM - sumPercentage));
 		//float sumCutDeviation = max(abs(sumCutErrorP - sumCut), abs(sumCutErrorM - sumCut));
 
-		float dcBinSize = 0.1;
 
 		sumCut = sumCut - dcBinSize / 2;
 		threshold = sumCut;
@@ -317,9 +331,12 @@ int main(int argc, char *argv[])
 		tree->Draw("chargeChannelSumWOMErrorP[3]>>cuttedHistErrorP", cutNum2);
 		tree->Draw("chargeChannelSumWOMErrorM[3]>>cuttedHistErrorM", cutNum3);
 
-		float efficiency = (cuttedHist->GetEntries() / allHist->GetEntries()) * 100;
-		float efficiencyErrorP = (cuttedHistErrorP->GetEntries() / allHistErrorP->GetEntries()) * 100;
-		float efficiencyErrorM = (cuttedHistErrorM->GetEntries() / allHistErrorM->GetEntries()) * 100;
+		float efficiency = ((numberToScaleUp-( allHist->GetEntries()-cuttedHist->GetEntries()))/numberToScaleUp) * 100;
+		float efficiencyErrorP =((numberToScaleUp-( allHistErrorP->GetEntries()-cuttedHistErrorP->GetEntries()))/numberToScaleUp) * 100;
+		float efficiencyErrorM =((numberToScaleUp-( allHistErrorM->GetEntries()-cuttedHistErrorM->GetEntries()))/numberToScaleUp) * 100;
+
+
+
 
 		float deviationP = abs(efficiencyErrorP - efficiency);
 		float deviationM = abs(efficiencyErrorM - efficiency);
@@ -366,7 +383,7 @@ int main(int argc, char *argv[])
 
 		TLegend *h_leg = new TLegend(0.45, 0.80, 0.99, 0.99);
 		h_leg->SetTextSize(0.02);
-		h_leg->AddEntry(allHist, Form("Entries: %1.1lf", allHist->GetEntries()), "f");
+		h_leg->AddEntry(allHist, Form("Entries: %1.1lf, Cutted: %1.1lf ", allHist->GetEntries(),cuttedHist->GetEntries()), "f");
 		h_leg->AddEntry(limit, Form("Threshold from: %s", thresholdName.c_str()), "l");
 		h_leg->AddEntry(limit, Form("Thr: %1.2f (+%1.2f -%1.2f) (P#leq%1.2f (+%1.2f -%1.2f%s))", threshold, sumCutErrorP,sumCutErrorM, sumPercentage, sumPercentageErrorP,sumPercentageErrorM, "%"), "l");
 		h_leg->AddEntry((TObject *)0, Form("Error Upper: sys:%1.4f, stat: %1.4f", deviationP, upperStatErr), "");
@@ -375,7 +392,7 @@ int main(int argc, char *argv[])
 
 		h_leg->SetTextFont(42);
 
-		h_leg->Draw();
+		if(!zoomMode)h_leg->Draw();
 		limit->Draw();
 
 		//TCanvas *statCanvas = new TCanvas("statCanvas", "Stat Histogram", 1000, 1000);
