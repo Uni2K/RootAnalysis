@@ -48,11 +48,22 @@ struct stat info;
 
 string outputFolder = "./EfficiencyPlots";
 string effFile = outputFolder + "/Efficiencies.txt";
+pair<int, int> pos0 = make_pair(0, 0);
+pair<int, int> pos1 = make_pair(160, 160);
+pair<int, int> pos2 = make_pair(320, 320);
+pair<int, int> pos3 = make_pair(-320, 320);
+pair<int, int> pos4 = make_pair(-160, 160);
+pair<int, int> pos5 = make_pair(-160, -160);
+pair<int, int> pos6 = make_pair(-320, -320);
 pair<int, int> pos7 = make_pair(320, -320);
 pair<int, int> pos8 = make_pair(160, -160);
-pair<int, int> pos0 = make_pair(0, 0);
-pair<int, int> pos4 = make_pair(-160, 160);
-pair<int, int> pos3 = make_pair(-320, 320);
+pair<int, int> pos9 = make_pair(160, -510);
+pair<int, int> pos10 = make_pair(204, -404);
+pair<int, int> pos11 = make_pair(310, -360);
+
+
+
+
 
 pair<int, int> posWOMD = make_pair(310, -510);
 float calculateDistance(pair<int, int> p1, pair<int, int> p2)
@@ -67,15 +78,28 @@ float getDistanceFromWOMD(int pos)
 	{
 	case 0:
 		return calculateDistance(posWOMD, pos0);
-	case 7:
-		return calculateDistance(posWOMD, pos7);
-	case 8:
-		return calculateDistance(posWOMD, pos8);
+	case 1:
+		return calculateDistance(posWOMD, pos1);
+	case 2:
+		return calculateDistance(posWOMD, pos2);
 	case 3:
 		return calculateDistance(posWOMD, pos3);
 	case 4:
 		return calculateDistance(posWOMD, pos4);
-
+	case 5:
+		return calculateDistance(posWOMD, pos5);
+	case 6:
+		return calculateDistance(posWOMD, pos6);
+	case 7:
+		return calculateDistance(posWOMD, pos7);
+	case 8:
+		return calculateDistance(posWOMD, pos8);
+	case 9:
+		return calculateDistance(posWOMD, pos9);
+	case 10:
+		return calculateDistance(posWOMD, pos10);
+	case 11:
+		return calculateDistance(posWOMD, pos11);
 	default:
 		return -1000;
 	}
@@ -138,12 +162,14 @@ int main(int argc, char *argv[])
 	{
 
 		string effName = lineWithDataMeasurement.substr(0, lineWithDataMeasurement.find("=")); //12_pos3_angle0_e52_ch32
+		if (effName.find("dc") != std::string::npos) {
+				continue;
+			}
 		vector<string> rawData = split(effName, "_");
 		string runPosRaw = rawData[1];
 
 		int runPos = stoi(runPosRaw.substr(3, runPosRaw.size() - 1));
 		int runEnergy = stoi(rawData[3].substr(1, rawData[3].size()));
-
 		string dataStr = lineWithDataMeasurement.substr(lineWithDataMeasurement.find("=") + 1, lineWithDataMeasurement.size());
 		vector<string> data = split(dataStr, "/");
 		float eff = stof(data[0]);
@@ -164,6 +190,7 @@ int main(int argc, char *argv[])
 		h_leg->SetTextSize(0.02);
 
 	
+		cout<<"test2"<<endl;
 
 	int colorCounter=1;
 	for (std::pair<int, map<int, vector<float>>> element : dataMap)

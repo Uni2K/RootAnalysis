@@ -241,7 +241,7 @@ for branch in range(0,3):
 
 	print("Calculations done!")
 
-	file = open("{:s}Thresholds_{:s}.txt".format(out_dir,ch_variable),"w")
+	file = open("{:s}Thresholds_{:s}.txt".format(out_dir,ch_variable),"a")
 	# loop over runs
 	for i in range(0,len(run_list)):
 		try:

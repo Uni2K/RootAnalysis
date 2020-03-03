@@ -233,7 +233,11 @@ int main(int argc, char *argv[])
 
 		if (onlyMatchingLimits)
 		{
-			int runNummerOfThreshold = stoi(split(lineWithDataMeasurement, "_")[2].substr(2, 3));
+			string d=split(lineWithDataMeasurement, "_")[2].substr(2, 3);
+			if (d.find("dc") != std::string::npos) {
+				continue;
+			}
+			int runNummerOfThreshold = stoi(d);
 
 			if (runNr != runNummerOfThreshold)
 			{
