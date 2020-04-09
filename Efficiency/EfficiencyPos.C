@@ -134,6 +134,13 @@ int main(int argc, char *argv[])
 	gStyle->SetLineStyleString(11, "5 5");
 	gErrorIgnoreLevel = kError;
 
+
+
+
+
+
+	TApplication *myapp = new TApplication("myapp", 0, 0);
+
 	//Output Plot Folder
 	string outDir = outputFolder + "/";
 	if (!fs::is_directory(outputFolder) || !fs::exists(outputFolder))
@@ -151,7 +158,7 @@ int main(int argc, char *argv[])
 
 	ifstream data_store(effFile);
 
-	TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 1000);
+	TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 600);
 	effCanvas->SetGrid();
 
 	map<int, map<int, vector<float>>> dataMap; //Key= Energy , Val: Runs<ValueTypes<Values>>>
@@ -186,11 +193,10 @@ int main(int argc, char *argv[])
 		c[runPos] = valueTypes;
 		dataMap[runEnergy] = c;
 	}
-		TLegend *h_leg = new TLegend(0.01, 0.3, 0.3, 0.45);
-		h_leg->SetTextSize(0.02);
+		TLegend *h_leg = new TLegend(0.12, 0.12, 0.35, 0.30);
+		h_leg->SetTextSize(0.04);
 
 	
-		cout<<"test2"<<endl;
 
 	int colorCounter=1;
 	for (std::pair<int, map<int, vector<float>>> element : dataMap)
@@ -218,25 +224,25 @@ int main(int argc, char *argv[])
 		TGraphAsymmErrors *gr = new TGraphAsymmErrors(n, &(x[0]), &(y[0]), 0, 0, &(yErrL[0]), &(yErrU[0]));
 		gr->SetTitle("Energy");
 		gr->SetLineColor(colorCounter);
-		gr->SetLineWidth(1.5);
+		gr->SetLineWidth(2.5);
 		gr->SetMarkerColor(colorCounter);
-		gr->SetMarkerSize(1.0);
+		gr->SetMarkerSize(1.2);
 		gr->SetMarkerStyle(20);
-		gr->GetXaxis()->SetLabelSize(0.035);
-		gr->GetYaxis()->SetLabelSize(0.035);
+		gr->GetXaxis()->SetLabelSize(0.085);
+		gr->GetYaxis()->SetLabelSize(0.085);
 		h_leg->AddEntry(gr, Form("Energy: %1.2f GeV",energy/10.0), "p");
 
-		TF1 *f1 = new TF1("fit","-[0]*exp(x*[2])+[1]",0,1000);
+		TF1 *f1 = new TF1("fit","-[0]*exp(x*[2])+[1]",160,2000);
 		f1->SetParameter(0,0.01);
 		f1->SetParameter(1,100);
 		f1->SetParameter(2,0.009);
-		//gr->Fit("fit");
+		//gr->Fit("fit", "R");
 
 
 
 		mg->Add(gr);
 		gStyle->SetTitleSize(0.2);
-		mg->SetTitle("Efficiency Measurement");
+		//mg->SetTitle("Efficiency Measurement");
 		
 		colorCounter++;
 	}
@@ -244,16 +250,18 @@ int main(int argc, char *argv[])
 
 	TAxis *yaxisP = mg->GetYaxis();
 	TAxis *xaxisP = mg->GetXaxis();
-	yaxisP->SetLabelSize(0.02);
+	yaxisP->SetLabelSize(0.04);
 	yaxisP->SetTitle("Efficiency [%]");
-	yaxisP->SetTitleSize(0.025);
-	xaxisP->SetLabelSize(0.02);
+	yaxisP->SetTitleSize(0.04);
+	xaxisP->SetLabelSize(0.04);
 	xaxisP->SetTitle("Distance [mm]");
-	xaxisP->SetTitleSize(0.025);
+	xaxisP->SetTitleSize(0.04);
 	h_leg->SetTextFont(42);
 	h_leg->Draw();
 
 	effCanvas->Print((outDir + "PosEfficiency.pdf").c_str());
+	cout<<"This needs to be closed manual, since the ROOT app is running! -> Strg + C"<<endl;
+	myapp->Run();
 
 	return 0;
 }

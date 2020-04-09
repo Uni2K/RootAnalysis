@@ -119,13 +119,7 @@ int main(int argc, char **argv)
   int xmax = 800;
   int nBins = (xmax - xmin) * 1;
   float range = 15;
-  //VB59: 9,700,[-50,700], 15
 
-  //Single Gauss Fit Range x2
-  // import/export directories & files
-  //string root_dir = "../rootfiles/"; // root files
-  // string root_dir = "../a_root_files/0_new_dynBL_noCalib_ampW50_intW25_scale0/"; // root files
-  //string in_dir = root_dir + run_name + ".root";
   string in_dir = fileLocation;                                             // path to current root file
                                                                             // path to current root file
   string out_dir = Form("./calib_histograms/charge/%s/", run_name.c_str()); // to export plots and values
@@ -194,137 +188,6 @@ int main(int argc, char **argv)
     // read off spectrum, ranges for individual peaks
     std::vector<double> ranges;
 
-    // final range values, Sep. 2019
-
-    // WOM-C/-D,40Array0 sw1
-    if (run_nr == 42)
-    {
-      ranges = {-20, 35, 85, 135, 190, 230, 270};
-    }
-    if (run_nr == 50)
-    {
-      ranges = {-20, 25, 75, 120, 160, 200, 240};
-    }
-    if (run_nr == 81)
-    {
-      ranges = {-20, 30, 75, 120, 160, 215, 250};
-    }
-
-    // WOM-C/-D,40Array0 sw2
-    if (run_nr == 41)
-    {
-      ranges = {-20, 35, 85, 120, 185, 220, 275};
-    }
-    if (run_nr == 47)
-    {
-      ranges = {-20, 25, 70, 115, 165, 205, 235};
-    }
-    if (run_nr == 77)
-    {
-      ranges = {-20, 30, 75, 120, 170, 220, 260};
-    }
-
-    // WOM-C/-D,40Array0 sw4
-    if (run_nr == 73)
-    {
-      ranges = {-20, 40, 90, 130, 175, 220, 280, 315};
-    }
-    if (run_nr == 84)
-    {
-      ranges = {-20, 40, 90, 130, 180, 220, 265, 320};
-    }
-    if (run_nr == 88)
-    {
-      ranges = {-20, 30, 75, 110, 150, 200, 220};
-    }
-
-    // WOM-A/-B,8Array0
-    if (run_nr == 65)
-    {
-      ranges = {-20, 45, 110, 160, 230, 290, 345};
-    }
-    if (run_nr == 68)
-    {
-      ranges = {-20, 40, 105, 160, 220, 280, 330};
-    }
-    if (run_nr == 69)
-    {
-      ranges = {-20, 45, 105, 170, 240, 280, 325};
-    }
-
-    // 8ArrayTB17
-    if (run_nr == 53)
-    {
-      ranges = {-25, 25, 65, 110, 140, 185};
-    }
-    if (run_nr == 82)
-    {
-      ranges = {-20, 30, 70, 115, 155, 195, 210};
-    }
-
-    // TB19 sw5
-    if (run_nr == 9)
-    {
-      ranges = {-20, 50, 120, 160, 220, 280, 330, 380, 440, 500, 550, 600, 660, 710, 770};
-    }
-    //ranges = {-20, 50, 120, 160, 220, 280, 330, 380, 440, 500, 550, 600, 660, 710, 770};
-    //ranges = {-20, 40, 85, 140, 190, 240, 300, 350, 400, 450, 500, 550,600, 660, 710, 770};
-    // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835};
-    // ranges = {-20, 35, 85, 135, 190, 235, 285, 330, 380,460, 485, 535, 585, 635,685, 735, 785, 835}; GOOD FOR VB59
-
-    //Run 23
-    /*    ranges = {-20, 25, 65, 110, 155, 195, 235, 280};
-    n_peaks = 6;
-    fitLimitEnd = 500;
-    fitLimitStart = -40; //40
-    xmin = -50;
-    xmax = 600;
-    nBins = (xmax - xmin) * 1;
-    range = 12;
- */
-
-    //Run 26
-    /*   ranges = {-20, 40, 100, 160, 215, 275, 330, 385};
-    n_peaks = 5;
-    fitLimitEnd = 600;
-    fitLimitStart = -40; //40
-    xmin = -50;
-    xmax = 600;
-    nBins = (xmax - xmin) * 1;
-    range = 12; */
-
-    //Run 28
-    /* ranges = {-20, 25, 68, 120, 165, 210, 260, 305};
-    n_peaks = 5;
-    fitLimitEnd = 600;
-    fitLimitStart = -20; //40
-    xmin = -50;
-    xmax = 600;
-    nBins = (xmax - xmin) * 1;
-    range = 12; */
-
-    //Run 32
-    /* ranges = {-20,15, 60, 80,105, 130, 160, 180,200,220,260};
-    n_peaks =5;
-    fitLimitEnd = 300;
-    fitLimitStart = -25; //40
-    xmin = -50;
-    xmax = 400;
-    nBins = (xmax - xmin) * 1;
-    range = 8;
-*/
-
-    /*ranges = {-3, 4, 8, 13, 18, 23, 29, 34,39,45,51,56,61 };
-    n_peaks = 7;
-    fitLimitEnd = 50;
-    fitLimitStart = -2; //40
-    xmin = -10;
-    xmax = 80;
-    nBins = 500;
-    range = 1.5;
-
-*/
-
     //Run 7 -> the one I used for Master Thesis: 7_calib_vb58_tune8700_pcbd
     switch (channel)
     {
@@ -350,6 +213,7 @@ int main(int argc, char **argv)
       range = 10;
 
       //GOOD RESULTS
+
       break;
     case 1:
       /*   ranges = {25, 70, 110, 155, 195, 250, 300};
@@ -364,10 +228,10 @@ int main(int argc, char **argv)
       ranges = {25, 70, 110, 155, 195, 250, 300};
       n_peaks = 5;
       fitLimitEnd = 225;
-      fitLimitStart = 39; //40
+      fitLimitStart = 38; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 2.32;
+      nBins = (xmax - xmin) * 2.29;
       range = 10;
 
       break;
@@ -384,12 +248,11 @@ int main(int argc, char **argv)
       ranges = {25, 70, 110, 155, 195, 250, 300};
       n_peaks = 5;
       fitLimitEnd = 230;
-      fitLimitStart = 32; //40
+      fitLimitStart = 30; //40
       xmin = -50;
       xmax = 400;
       nBins = (xmax - xmin) * 2.2999;
       range = 10;
-
       break;
 
     case 3:
@@ -404,13 +267,13 @@ int main(int argc, char **argv)
 
       ranges = {25, 75, 120, 160, 200, 250, 300};
       n_peaks = 5;
-      fitLimitEnd = 236;
-      fitLimitStart = 36; //40
+      fitLimitEnd = 234;
+      fitLimitStart = 35; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 2.2054;
+      nBins = (xmax - xmin) * 2.20;
       range = 6;
-
+      ;
       break;
     case 4:
       /* ranges = {25, 75, 120, 160, 200, 250, 300};
@@ -424,13 +287,12 @@ int main(int argc, char **argv)
 
       ranges = {25, 75, 120, 160, 200, 250, 300};
       n_peaks = 5;
-      fitLimitEnd = 226;
-      fitLimitStart = 34; //40
+      fitLimitEnd = 228;
+      fitLimitStart = 35; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 1.5;
+      nBins = (xmax - xmin) * 3.65;
       range = 6;
-
       break;
     case 5:
       /*    ranges = {25, 70, 110, 155, 195, 250, 300};
@@ -448,9 +310,8 @@ int main(int argc, char **argv)
       fitLimitStart = 37; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 1.999;
+      nBins = (xmax - xmin) * 3.15;
       range = 10;
-
       break;
     case 6:
       /*  ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
@@ -468,9 +329,8 @@ int main(int argc, char **argv)
       fitLimitStart = 41; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 1.90;
+      nBins = (xmax - xmin) * 3.49;
       range = 10;
-
       break;
     case 7:
       /*  ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
@@ -484,11 +344,11 @@ int main(int argc, char **argv)
 
       ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
       n_peaks = 5;
-      fitLimitEnd = 246;
-      fitLimitStart = 42; //40
+      fitLimitEnd = 250;
+      fitLimitStart = 39; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 1.2027;
+      nBins = (xmax - xmin) * 3.3;
       range = 10;
 
       break;
@@ -506,24 +366,33 @@ int main(int argc, char **argv)
     TString h_title;
     if (sw_id == "none")
     {
-      h_title = Form("pulse-height spectrum - Hamamatsu S13360-%s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), channel);
+      // h_title = Form("pulse-height spectrum - Hamamatsu S13360-%s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), channel);
     }
     else
     {
-      h_title = Form("pulse-height spectrum - Hamamatsu S13360-%s, %s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), sw_id.c_str(), channel);
+      // h_title = Form("pulse-height spectrum - Hamamatsu S13360-%s, %s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), sw_id.c_str(), channel);
     }
 
     TH1F *h = new TH1F("h", h_title, nBins, xmin, xmax);
     h->SetLineColorAlpha(kBlack, 0.7);
     h->SetMarkerStyle(7);
     h->SetMarkerColorAlpha(kBlack, 0.6);
-
+    h->SetMarkerSize(0);
     TString cut("");
     tree->Draw(Form("Integral[%d]>>h", channel), cut);
+    //tree->Draw(Form("Integral[%d]>>h", channel), cut);
+    //tree->Draw(Form("Integral[%d]>>h", channel), cut);
 
     h->Smooth(0);
     // to show alternative fit
-    TCanvas *C2 = new TCanvas("C2", "alt fit", 1000, 800);
+    int hi = 800;
+    if (light)
+    {
+      hi = 500;
+    }
+
+    TCanvas *C2 = new TCanvas("C2", "alt fit", 1000, hi);
+
     TH1F *h2 = new TH1F("h2", "", nBins, xmin, xmax);
     h2 = (TH1F *)h->Clone();
     h2->GetXaxis()->SetRangeUser(xmin, xmax);
@@ -572,8 +441,16 @@ int main(int argc, char **argv)
     *****/
 
     TF1 *f = new TF1("fitf", fitf, fitLimitStart, fitLimitEnd, 7);
-    h->GetYaxis()->SetTitle("entries");
-    h->GetXaxis()->SetTitle("pulse-height(integral) [mV #times ns]");
+    h->GetYaxis()->SetTitle("Counts");
+    h->GetXaxis()->SetTitle("mV #times ns");
+    if (light)
+    {
+      h->GetXaxis()->SetLabelSize(0.04);
+      h->GetXaxis()->SetTitleSize(0.04);
+      h->GetYaxis()->SetLabelSize(0.04);
+      h->GetYaxis()->SetTitleSize(0.04);
+    }
+
     f->SetLineColor(kGreen);
     f->SetLineStyle(1);
     f->SetNpx(1000);
@@ -664,9 +541,16 @@ int main(int argc, char **argv)
     if (!light)
       h2->Fit("alt", "RQM");
 
-    h2->GetYaxis()->SetTitle("entries");
-    h2->GetXaxis()->SetTitle("pulse-height(charge) [mV #times ns]");
-    h2->GetXaxis()->SetTitleOffset(1.4);
+    h2->GetYaxis()->SetTitle("Counts");
+    h2->GetXaxis()->SetTitle("mV #times ns");
+    if (light)
+    {
+      h2->GetXaxis()->SetLabelSize(0.04);
+      h2->GetXaxis()->SetTitleSize(0.04);
+      h2->GetYaxis()->SetLabelSize(0.04);
+      h2->GetYaxis()->SetTitleSize(0.04);
+    }
+
     h2->SetFillColorAlpha(kBlack, 0.1);
     h2->Draw("HISTE");
 
@@ -708,27 +592,28 @@ int main(int argc, char **argv)
     double gauss_chi2_ndof = alt->GetChisquare() / alt->GetNDF();
 
     // custom legend
-    TLegend *h_leg = new TLegend(0.65, 0.65, 0.99, 0.9);
-    h_leg->SetTextSize(0.02);
-    h_leg->AddEntry(h2, Form("#bf{data}"), "lpef");
-    h_leg->AddEntry((TObject *)0, Form("entries: %1.0f", h2->GetEntries()), "");
+    TLegend *h_leg = new TLegend(0.65, 0.60, 0.99, 0.9);
+    h_leg->SetTextSize(0.04);
+    h_leg->AddEntry(h2, Form("#bf{pulse-charge spectrum}"), "lpef");
+    if (!light)
+      h_leg->AddEntry((TObject *)0, Form("entries: %1.0f", h2->GetEntries()), "");
     if (!light)
       h_leg->AddEntry((TObject *)0, Form("integration window 25 ns"), "");
     if (!light)
       h_leg->AddEntry(f, Form("Generalized Poisson #times Gaussian fit"), "l");
-    h_leg->AddEntry((TObject *)0, Form("#chi^{2}/ndf = %1.2f", GP_chi2_ndof), "");
-    if (!light)
-      h_leg->AddEntry((TObject *)0, Form("N = %1.f #pm %1.f", norm, norm_err), "");
-    if (!light)
-      h_leg->AddEntry((TObject *)0, Form("#mu = %1.2f #pm %1.2f", mu, mu_err), "");
-    if (!light)
-      h_leg->AddEntry((TObject *)0, Form("#lambda = %1.3f #pm %1.3f", mu_xt, mu_xt_err), "");
+    h_leg->AddEntry((TObject *)0, Form("#chi^{2}_{red} = %1.2f", GP_chi2_ndof), "");
+    // if (!light)
+    h_leg->AddEntry((TObject *)0, Form("N = %1.f #pm %1.f", norm, norm_err), "");
+    // if (!light)
+    h_leg->AddEntry((TObject *)0, Form("#mu = %1.2f #pm %1.2f", mu, mu_err), "");
+    // if (!light)
+    h_leg->AddEntry((TObject *)0, Form("#lambda = %1.3f #pm %1.3f", mu_xt, mu_xt_err), "");
     if (!light)
       h_leg->AddEntry((TObject *)0, Form("#sigma_{0} = %1.5f #pm %1.5f", sig0, sig0_err), "");
     if (!light)
       h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.5f #pm %1.5f", sig1, sig1_err), "");
-    h_leg->AddEntry((TObject *)0, Form("G_{fit,charge} = %1.5f #pm %1.5f", calib_factor, calib_factor_err), "");
-    h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
+    h_leg->AddEntry((TObject *)0, Form("K = %1.3f #pm %1.3f", calib_factor, calib_factor_err), "");
+    //h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
     if (!light)
     {
       h_leg->AddEntry(alt, Form("multi-Gaussian fit"), "l");
@@ -799,11 +684,11 @@ int main(int argc, char **argv)
     TGraphErrors *gr_alt = new TGraphErrors(n_peaks - 2, x_values, diff, x_values_err, u_diff);
     if (sw_id == "none")
     {
-      gr_alt->SetTitle(Form("pulse-height spectrum: peak-to-peak distance - Hamamatsu S13360-%s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), channel));
+      //gr_alt->SetTitle(Form("pulse-height spectrum: peak-to-peak distance - Hamamatsu S13360-%s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), channel));
     }
     else
     {
-      gr_alt->SetTitle(Form("pulse-height spectrum: peak-to-peak distance - Hamamatsu S13360-%s, %s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), sw_id.c_str(), channel));
+      //  gr_alt->SetTitle(Form("pulse-height spectrum: peak-to-peak distance - Hamamatsu S13360-%s, %s, %s, ch%d", sipm_id.c_str(), wom_id.c_str(), sw_id.c_str(), channel));
     }
     gr_alt->GetYaxis()->SetRangeUser(calib_factor - l_values, calib_factor + u_values);
     gr_alt->GetXaxis()->SetNdivisions(n_peaks - 2);
@@ -853,8 +738,8 @@ int main(int argc, char **argv)
     gr_comb2->Draw("l3");
 
     // print legend
-    TLegend *leg = new TLegend(0.33, 0.6, 0.9, 0.9);
-    leg->SetTextSize(0.03);
+    TLegend *leg = new TLegend(0.33, 0.56, 0.9, 0.9);
+    leg->SetTextSize(0.04);
     leg->AddEntry("gr_alt", "peak-to-peak distance #Delta_{ptp,k} of k^{th} peak", "ep");
     leg->AddEntry("gr_comb2", Form("gain G_{fit,charge} = %1.2f mV #times ns", calib_factor), "l");
     leg->AddEntry((TObject *)0, Form("1#sigma-uncertainty bands:"), "");

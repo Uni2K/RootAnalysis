@@ -52,7 +52,7 @@ string thresholdsFile = "./Thresholds_Integral.txt";
 string thresholdsFileErrorP = "./Thresholds_IntegralErrorP.txt";
 string thresholdsFileErrorM = "./Thresholds_IntegralErrorM.txt";
 
-string runNameDC = "33_dc_vb58_pcbd";
+string runNameDC = "331_dc_vb58_pcbd";
 
 string extractValues(string str)
 {
@@ -162,8 +162,6 @@ int main(int argc, char *argv[])
 	gStyle->SetLineStyleString(11, "5 5");
 	gErrorIgnoreLevel = kError;
 
-	bool onlyMatchingLimits = true; //If true-> Threshold with the same name only gets used
-
 	string runName = (string)argv[1];
 	int runNr = atoi(argv[2]);
 	string inDir = string(argv[3]);
@@ -178,30 +176,24 @@ int main(int argc, char *argv[])
 
 		exit(-1);
 	}
+
 	TTree *tree;
 	file->GetObject("T", tree);
 
 	gStyle->SetOptTitle(0);
 	int channelNumber = 16;
+	int entryNumber = 16;
 
 	file->GetObject("T", tree);
 	tree->SetBranchAddress("nCh", &channelNumber);
 	tree->GetEntry(1);
 
 	int plotGrid = ceil(sqrt(channelNumber));
-
-	//effCanvas->Divide(1,2);
-
-
 	bool zoomMode=false;
 	int numberToScaleUp=10010;
-
 	float dcBinSize = 0.1;
-
-	int maxX = 4500;
-	
+	int maxX = 1700;
 	int min = -100;
-	
 	int numberOfNPE=maxX-min;
 	int bins = numberOfNPE*(1.0/dcBinSize); //0.1 Photoelectron
 	bins=450;
@@ -215,36 +207,43 @@ int main(int argc, char *argv[])
 	float thresholdErrorP = -1;
 	float thresholdErrorM = -1;
 
+
+
 	std::ifstream inFile(thresholdsFile);
 	int numberOfLines = std::count(std::istreambuf_iterator<char>(inFile),
 								   std::istreambuf_iterator<char>(), '\n');
 
-	//Find Content of calibration Run inside text file
+	//find threshold
 	ifstream data_store(thresholdsFile);
 	ifstream data_storeErrorP(thresholdsFileErrorP);
 	ifstream data_storeErrorM(thresholdsFileErrorM);
 
-	int counter = 0;
+	TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 500);
+	effCanvas->SetGrid();
 
-	for (string lineWithDataMeasurement; getline(data_store, lineWithDataMeasurement);)
+	bool foundThreshold=false;
+	string lineWithDataMeasurement;
+	for (string lineWithDataMeasurement_; getline(data_store, lineWithDataMeasurement_);)
 	{
-		TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 1000);
-		effCanvas->SetGrid();
-
-		if (onlyMatchingLimits)
-		{
-			string d=split(lineWithDataMeasurement, "_")[2].substr(2, 3);
-			if (d.find("dc") != std::string::npos) {
+		
+		string d=split(lineWithDataMeasurement_, "_")[2].substr(2, 3);
+		
+	/*	if (d.find("dc") != std::string::npos) {
 				continue;
-			}
+			}*/
 			int runNummerOfThreshold = stoi(d);
-
 			if (runNr != runNummerOfThreshold)
 			{
 				continue;
 			}
-		}
-		//Output Plot Folder
+		foundThreshold=true;
+		lineWithDataMeasurement=lineWithDataMeasurement_;
+	}
+		cout<<"FOUND THRESHOLD: "<<foundThreshold<<" LINE: "<<lineWithDataMeasurement<<" CURRENT RUN: "<<runName<<endl;
+
+		if(!foundThreshold)return 0;
+
+			//Output Plot Folder
 		string outDir = Form((outputFolder + "/%s/").c_str(), runName.c_str());
 		if (!fs::is_directory(outputFolder) || !fs::exists(outputFolder))
 		{
@@ -254,6 +253,7 @@ int main(int argc, char *argv[])
 		{
 			fs::create_directory(outDir);
 		}
+	
 		string thresholdName = lineWithDataMeasurement.substr(0, lineWithDataMeasurement.find("="));
 		string lineWithDataMeasurementErrorP;
 		string lineWithDataMeasurementErrorM;
@@ -295,10 +295,7 @@ int main(int argc, char *argv[])
 		float sumPercentageErrorP = percentagesErrorP.back() * 100;
 		float sumPercentageErrorM = percentagesErrorM.back() * 100;
 
-		//float sumPercentageDeviation = max(abs(sumPercentageErrorP - sumPercentage), abs(sumPercentageErrorM - sumPercentage));
-		//float sumCutDeviation = max(abs(sumCutErrorP - sumCut), abs(sumCutErrorM - sumCut));
-
-
+	
 		sumCut = sumCut - dcBinSize / 2;
 		threshold = sumCut;
 		sumCutErrorP = sumCutErrorP - dcBinSize / 2;
@@ -307,7 +304,6 @@ int main(int argc, char *argv[])
 		thresholdErrorM = sumCutErrorM;
 
 		printf("Sum Cut: %1.2f (%1.2f,%1.2f) ::: Percentages: %1.2f (%1.2f,%1.2f) \n", sumCut, sumCutErrorP, sumCutErrorM, sumPercentage, sumPercentageErrorP, sumPercentageErrorM);
-		//cout << "Using DC Run: CUT:" << vectorToString(npeCuts) << " AND: " << vectorToString(percentages) << endl;
 
 		TH1D *allHist = new TH1D("allHist", "", bins, min, maxX);
 		TH1D *allHistErrorP = new TH1D("allHistErrorP", "", bins, min, maxX);
@@ -315,7 +311,6 @@ int main(int argc, char *argv[])
 
 		allHist->SetFillColorAlpha(kBlue, 0.4);
 		allHist->SetLineColorAlpha(1, 0);
-		//hs->Add(allHistErrorP);
 
 		TH1D *cuttedHist = new TH1D("cuttedHist", "", bins, min, maxX);
 		TH1D *cuttedHistErrorP = new TH1D("cuttedHistErrorP", "", bins, min, maxX);
@@ -360,20 +355,20 @@ int main(int argc, char *argv[])
 
 		TAxis *yaxisP = allHist->GetYaxis();
 		TAxis *xaxisP = allHist->GetXaxis();
-		yaxisP->SetLabelSize(0.02);
+		yaxisP->SetLabelSize(0.04);
 		yaxisP->SetTitle("Counts");
-		yaxisP->SetTitleSize(0.025);
-		xaxisP->SetLabelSize(0.02);
-		xaxisP->SetTitle("NPE");
-		xaxisP->SetTitleSize(0.025);
+		yaxisP->SetTitleSize(0.04);
+		xaxisP->SetLabelSize(0.04);
+		xaxisP->SetTitle("Integral");
+		xaxisP->SetTitleSize(0.04);
 
 		allHist->Draw("hist");
 
 		TLatex latex;
 		latex.SetNDC(true);
-		latex.SetTextSize(0.020);
+		latex.SetTextSize(0.04);
 		latex.SetTextAlign(13); //align at top
-		latex.DrawLatex(0.1, 0.93, Form("Efficiency: %s", runName.c_str()));
+		//latex.DrawLatex(0.1, 0.93, Form("Efficiency: %s", runName.c_str()));
 
 		//hs->Draw("nostack");
 		effCanvas->Update();
@@ -385,14 +380,16 @@ int main(int argc, char *argv[])
 
 		int binOfThreshold = allHist->FindBin(threshold);
 
-		TLegend *h_leg = new TLegend(0.45, 0.80, 0.99, 0.99);
-		h_leg->SetTextSize(0.02);
+		TLegend *h_leg = new TLegend(0.50, 0.62, 0.90, 0.90);
+		h_leg->SetTextSize(0.03);
 		h_leg->AddEntry(allHist, Form("Entries: %1.1lf, Cutted: %1.1lf ", allHist->GetEntries(),cuttedHist->GetEntries()), "f");
-		h_leg->AddEntry(limit, Form("Threshold from: %s", thresholdName.c_str()), "l");
-		h_leg->AddEntry(limit, Form("Thr: %1.2f (+%1.2f -%1.2f) (P#leq%1.2f (+%1.2f -%1.2f%s))", threshold, sumCutErrorP,sumCutErrorM, sumPercentage, sumPercentageErrorP,sumPercentageErrorM, "%"), "l");
-		h_leg->AddEntry((TObject *)0, Form("Error Upper: sys:%1.4f, stat: %1.4f", deviationP, upperStatErr), "");
-		h_leg->AddEntry((TObject *)0, Form("Error Lower: sys:%1.4f, stat: %1.4f", deviationM, lowerStatErr), "");
-		h_leg->AddEntry((TObject *)0, Form("#bf{Efficiency %1.4f (+%1.4lf,-%1.4lf)}", efficiency, combinedUpperError, combinedLowerError), "");
+		//h_leg->AddEntry(limit, Form("Threshold from: %s", thresholdName.c_str()), "l");
+		h_leg->AddEntry(limit, Form("#Lambda_{thr}: %1.2f (+%1.2f -%1.2f)", threshold, sumCutErrorP,sumCutErrorM), "l");
+		h_leg->AddEntry(limit, Form("P_{thr}: %1.2f (+%1.2f -%1.2f%s)", sumPercentage, sumPercentageErrorP,sumPercentageErrorM, "%"), "l");
+
+		h_leg->AddEntry((TObject *)0, Form("Err Up :#Delta E_{sys}:%1.4f, #Delta E_{stat}: %1.4f", deviationP, upperStatErr), "");
+		h_leg->AddEntry((TObject *)0, Form("Err Low :#Delta E_{sys}:%1.4f, #Delta E_{stat}: %1.4f", deviationM, lowerStatErr), "");
+		h_leg->AddEntry((TObject *)0, Form("#bf{Efficiency: %1.4f%s (+%1.4lf,-%1.4lf)}",efficiency,"%", combinedUpperError, combinedLowerError), "");
 
 		h_leg->SetTextFont(42);
 
@@ -414,35 +411,12 @@ int main(int argc, char *argv[])
 		fprintf(file_listP, "%s=%1.4f/%1.4lf/%1.4lf) \n", string(runName).c_str(), efficiency, combinedUpperError, combinedLowerError);
 		fclose(file_listP);
 
-		if (onlyMatchingLimits)
-		{
-			effCanvas->Print((outDir + runName + "_Efficiency.pdf").c_str());
-		}
-		else
-		{
-			if (counter == 0)
-			{
-				effCanvas->Print((outDir + runName + "_Efficiency.pdf(").c_str());
-			}
-			else if (counter == numberOfLines - 1)
-			{
-				effCanvas->Print((outDir + runName + "_Efficiency.pdf)").c_str());
-			}
-			else
-			{
-				effCanvas->Print((outDir + runName + "_Efficiency.pdf").c_str());
-			}
-		}
-		counter++;
-	}
+	
+		effCanvas->Print((outDir + runName + "_Efficiency.pdf").c_str());
+	
+	
 
-	/*for (int j = 1; j <= allHist->GetXaxis()->GetNbins(); j++)
-	{
-		if (eff1->GetEfficiency(j) > 0.0)
-		{
-			outputstream << Form("%d \t %f \t %f \t %f", 1, eff1->GetEfficiency(j), eff1->GetEfficiencyErrorLow(j), eff1->GetEfficiencyErrorUp(j)) << endl;
-		}
-	}*/
+
 
 	return 0;
 }

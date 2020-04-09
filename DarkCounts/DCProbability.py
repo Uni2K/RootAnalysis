@@ -272,7 +272,7 @@ for branch in range(0,3):
 					x_max = sumXMax
 					x_ticks = np.arange(0, x_max+1,5)
 
-				fig0, ax0 = plt.subplots( nrows=1, ncols=1, figsize=(6,5) )
+				fig0, ax0 = plt.subplots( nrows=1, ncols=1, figsize=(8,5) )
 				fig0.suptitle(single_fig_title,ha="left", x = 0.05, y = 0.96, fontsize=9)
 
 				ax = ax0
@@ -280,14 +280,16 @@ for branch in range(0,3):
 				## weights normalize by number of histogram entries
 				weights = np.ones_like(df_data[data_id].dropna().values)/float(len(df_data[data_id].dropna().values))
 			
-				## dc pulse-heigt, 1 bin per photoelctron
-				ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="step",color=ch_hist_color,alpha=0.8, log=logEnabled,label="1 bin per photoelectron\nmean: $N_{{pe}}$ = {:1.2f}".format(df_mean.iloc[(k+i*9),0]),zorder=2,density=False)
+			
+				## dc pulse-heigt, 10 times more bins -> quasi continuous
+			#	nBins = int(((df_data[data_id].max() - df_data[data_id].min()) *10).round(0))
+			#	ax.hist(df_data[data_id].dropna().values, weights=weights, bins=nBins, histtype="stepfilled",color=sum_hist_color,alpha=0.8, log=logEnabled,label="PCS raw-data".format(df_mean.iloc[(k+i*9),0]),zorder=1,density=False)
 
-				## dc pulse-heigt, 10 bin per photoelctron
-				nBins = int(((df_data[data_id].max() - df_data[data_id].min()) *10).round(0))
-				ax.hist(df_data[data_id].dropna().values, weights=weights, bins=nBins, histtype="stepfilled",color=sum_hist_color,alpha=0.8, log=logEnabled,label="10 bin per photoelectron\nmean: $N_{{pe}}$ = {:1.2f}".format(df_mean.iloc[(k+i*9),0]),zorder=1,density=False)
+				## dc pulse-heigt, corrected binning
+				binsPerNpe=int(1/npe_granularity)
+				ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="step",color=ch_hist_color,alpha=0.8, log=logEnabled,label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]),zorder=2,density=False)
 
-		
+
 				probMatchingPercent=df_cprob[df_cprob.iloc[:, (k+i*9)+1] <= threshold]
 
 				rowOfMatching=probMatchingPercent.iloc[0,0]
@@ -296,23 +298,25 @@ for branch in range(0,3):
 
 				#display(probMatchingPercent)
 				#display(rowOfMatching)
-				ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=3,marker="o",label=("cumm.: "r"$N_{{pe}}(P\leq {:1.2f}\%) \geq $ {:1.2f}".format(percentageOfMatching*100,rowOfMatching)),zorder=2)
-
+				ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=2,marker="o",label=( r"$P_{{DC}}(\Lambda)$"+"\n"+r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)+ "\n" +"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching)),zorder=2)
 
 				# ax.set_title(single_fig_title,fontsize=10)
-				ax.set_xlabel("number-of-photoelectrons [$N_{pe}$]",fontsize=9)
-				ax.set_ylabel("probability",fontsize=9)
-				ax.legend(loc="best",fontsize=8)
+				ax.set_xlabel("$\Lambda[N_{{pe}}]$",fontsize=10)
+				ax.set_ylabel("$P_{DC}$",fontsize=10)
+				ax.legend(loc="best",fontsize=10)
 				ax.set_xticks(x_ticks)
 				ax.set_xlim(x_min,x_max)
 				# ax.tick_params(axis='y', labelcolor=ch_hist_color,labelsize=y_labelsize)
 				ax.grid(True,"both","both",alpha=grid_alpha,color=ch_prob_color)
 
 				plt.subplots_adjust(left=0.12, right=0.99, top=0.9, bottom=0.1, hspace=0.15, wspace=0.2)
+				if os.path.isfile(pdf_filename):
+  					os.remove(pdf_filename)
 				plt.savefig(pdf_filename)
 				plt.close()	
-		except KeyError:
-			print("Skipped")
+		except KeyError as err:
+			print("KeyError: {0}".format(err))
+			print("Skipped: KeyError -> Missing Branches in Root File most likely!") 
 		file.write("}\n") 	
 
 		#_____ COMBINED PLOT ____
@@ -374,6 +378,8 @@ for branch in range(0,3):
 			ax.grid(True,"both","both",alpha=grid_alpha,color=ch_prob_color)
 
 		plt.subplots_adjust(left=0.06, right=0.99, top=0.93, bottom=0.06, hspace=0.35, wspace=0.30)
+		if os.path.isfile(comb_pdf_filename):
+  			 os.remove(comb_pdf_filename)
 		plt.savefig(comb_pdf_filename)
 		plt.close()	
 	print("Done Branch:{:d}".format(branch))

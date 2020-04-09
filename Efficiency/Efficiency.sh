@@ -31,6 +31,12 @@ g++ Efficiency.C -lstdc++fs `root-config --libs --cflags` -o efficiency -lSpectr
 	suffix=".root"
 	runName=${runName%$suffix} #Remove suffix
 
+
+	if [[ $runName == *"dc"* ]]; then
+ 		 continue;
+	fi
+
+
 	runNr=$(echo "$runName" | sed -r 's/^([^.]+).*$/\1/; s/^[^0-9]*([0-9]+).*$/\1/')
 	
 	./efficiency $runName $runNr $rootFilePath 

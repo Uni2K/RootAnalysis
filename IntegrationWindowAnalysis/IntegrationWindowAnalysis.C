@@ -206,7 +206,10 @@ int smoothDefault=1500;
 
 int peakLeftThreshold=100;
 int peakRightThreshold= 280;
+bool singlePrinter=false;
 
+float labelTextSize=0.02;
+int lineSize=2;
 
 int main(int argc, char *argv[])
 {
@@ -220,6 +223,12 @@ int main(int argc, char *argv[])
 	gStyle->SetLineStyleString(11, "5 5");
 
 	gErrorIgnoreLevel = kError;
+
+	if(singlePrinter){
+		labelTextSize=0.045;
+		lineSize=4;
+	}
+
 
 	string runName = (string)argv[1];
 	int runNr = atoi(argv[2]);
@@ -250,17 +259,27 @@ int main(int argc, char *argv[])
 	file->GetObject("T", tree);
 
 	//Create 2 Canvas -> 1 for sumHistograms, 1 for Percentage Plots
-	TCanvas *sumCanvas = new TCanvas("sumCanvas", "Sum Histogram", 1000, 1000);
+	TCanvas *sumCanvas = new TCanvas("sumCanvas", "Sum Histogram", 1600, 1000);
 	TCanvas *percentageCanvas = new TCanvas("percentageCanvas", "Percentages", 1000, 1000);
 
-	int channelNumber = 16;
+	int channelNumber = 8;
 	file->GetObject("T", tree);
-	tree->SetBranchAddress("nCh", &channelNumber);
-	tree->GetEntry(1);
+	//tree->SetBranchAddress("nCh", &channelNumber);
+	//tree->GetEntry(1);
 
 	int plotGrid = ceil(sqrt(channelNumber));
-	sumCanvas->Divide(plotGrid, plotGrid);
-	percentageCanvas->Divide(plotGrid, plotGrid);
+
+	if(!singlePrinter){
+		sumCanvas->Divide(plotGrid, plotGrid);
+			percentageCanvas->Divide(plotGrid, plotGrid);
+
+	}
+	else{
+		sumCanvas->Divide(1,2);
+		percentageCanvas->Divide(1, 2);
+
+	} 
+	
 	sumCanvas->SetLeftMargin(0.15);
 	FILE *file_list;
 	string list_filename = outputFolder + "/IntegrationWindows.txt";
@@ -279,13 +298,18 @@ int main(int argc, char *argv[])
 
 	fprintf(file_listP, "PV_%s={", string(runName).c_str());
 	fprintf(file_list, "IW_%s={", string(runName).c_str());
-
-	for (int i = 0; i < channelNumber; ++i)
+		
+	for (int i = 0; i < channelNumber; i++)
 	{
 		//OscillationAnalysis ---------------------------------------------------------
 		cout <<" " << endl;
 
-		sumCanvas->cd(i + 1);
+		if(!singlePrinter){
+			sumCanvas->cd(i + 1);
+		}
+		else{
+			sumCanvas->cd(1);
+		} 
 		sumCanvas->SetGrid();
 		//	gPad->SetGridx();
 		//	gPad->SetGridy();
@@ -329,8 +353,11 @@ int main(int argc, char *argv[])
 
 		TAxis *yaxis = sumHist->GetYaxis();
 		TAxis *xaxis = sumHist->GetXaxis();
-		yaxis->SetLabelSize(0.02);
-		xaxis->SetLabelSize(0.02);
+		yaxis->SetLabelSize(labelTextSize);
+		xaxis->SetLabelSize(labelTextSize);
+
+		
+
 
 		sumCanvas->Update();
 		float t_amp = t_max_inRange(sumHist, 0.0, 320.0);
@@ -402,9 +429,9 @@ int main(int argc, char *argv[])
 			peak_single[i] = new TF1("peak", "gaus", pos_peak - range, pos_peak + range);
 			peak_single[i]->SetLineStyle(11);
 			peak_single[i]->SetLineColor(kRed);
-
+			if(singlePrinter)peak_single[i]->SetLineWidth(0);
 			sumHist->Fit("peak", "RQ+");
-			peak_single[i]->Draw("same");
+		if(!singlePrinter)	peak_single[i]->Draw("same");
 			chi2ndf[i] = peak_single[i]->GetChisquare() / peak_single[i]->GetNDF();
 			meanError[i] = peak_single[i]->GetParError(1);
 			peak_single[i]->GetParameters(&par_single[3 * i]);
@@ -485,25 +512,25 @@ int main(int argc, char *argv[])
 			putc->SetParameter(1, 155);
 			putc->SetParameter(2, 5);
 			sumHist->Fit("inversepeak", "RQ+");
-			putc->Draw("same");
+			if(!singlePrinter) putc->Draw("same");
 
 			float minInRange = sumHist->GetFunction("inversepeak")->GetMinimumX(par_single[1 + 3] - 20, par_single[1 + 3]);
 			float minInRangeError = 320.0 / (sumHist->GetNbinsX());
 			TLine *minLine = new TLine(minInRange, minY, minInRange, maxY);
 			minLine->SetLineColor(3);
-			minLine->SetLineWidth(1);
+			minLine->SetLineWidth(lineSize);
 
 			float entireSignalRight = 3 * meanPeriod + minInRange;
 
 
 			TLine *entireSignalRightLine = new TLine(entireSignalRight, minY, entireSignalRight, maxY);
 			entireSignalRightLine->SetLineColor(9);
-			entireSignalRightLine->SetLineWidth(1);
+			entireSignalRightLine->SetLineWidth(lineSize);
 			entireSignalRightLine->Draw();
 
 			TLine *leftLine = new TLine(means[0] - integrationLeftOffset, minY, means[0] - integrationLeftOffset, maxY);
 			leftLine->SetLineColor(2);
-			leftLine->SetLineWidth(1);
+			leftLine->SetLineWidth(lineSize);
 
 			float allSignalError = sqrt(pow(3 * meanPeriodError, 2) + pow(meanError[0], 2));
 
@@ -516,7 +543,7 @@ int main(int argc, char *argv[])
 
 			TLine *baselineUsed = new TLine(30, BL_shift, 70, BL_shift);
 			baselineUsed->SetLineColor(9);
-			baselineUsed->SetLineWidth(2);
+			baselineUsed->SetLineWidth(lineSize);
 
 			float integralPeak = IntegralHist(sumHistCalculation, means[0] - integrationLeftOffset, minInRange, BL_shift);
 			float integralPeakAll = IntegralHist(sumHistCalculation, means[0] - integrationLeftOffset, entireSignalRight, BL_shift);
@@ -570,7 +597,7 @@ int main(int argc, char *argv[])
 			minLine->Draw();
 			leftLine->Draw();
 			baselineUsed->Draw();
-			putc->Draw("same");
+			if(!singlePrinter)putc->Draw("same");
 
 			fprintf(file_list, "%f/%f,", minInRange - means[0], entireSignalRight - means[0]);
 
@@ -580,7 +607,7 @@ int main(int argc, char *argv[])
 			fprintf(file_list, "%f/%f,", 0.0, 0.0);
 		}
 
-		sumHistLegend->Draw();
+	if(!singlePrinter)	sumHistLegend->Draw();
 
 
 
@@ -596,8 +623,12 @@ int main(int argc, char *argv[])
  */
 
 		printf("Uncertainty: %s, Channel: %d\n", runName.c_str(), i);
-
+		if(!singlePrinter){
 		percentageCanvas->cd(i + 1);
+		}else{
+		percentageCanvas->cd(1);
+		}
+		
 
 		int xmin = -2;
 		int xmax = 2.2;
@@ -607,7 +638,7 @@ int main(int argc, char *argv[])
 
 		TH1F *h = new TH1F("h", "Percentage", nBins, xmin, xmax);
 		h->SetTitle("");
-		h->SetLineColorAlpha(kBlack, 0.7);
+		h->SetLineColorAlpha(kBlack, 1);
 		h->SetMarkerStyle(7);
 		h->SetMarkerColorAlpha(kBlack, 0.6);
 
@@ -617,32 +648,35 @@ int main(int argc, char *argv[])
 		percentageCanvas->Update();
 		minY = gPad->GetUymin();
 		maxY = gPad->GetUymax();
-		TLegend *h_leg = new TLegend(0, 0.75, 0.37, 1);
+		TLegend *h_leg = new TLegend(0.15, 0.70, 0.51, 0.9);
 		h_leg->SetTextFont(62);
-		h_leg->SetHeader(Form("Percentages Channel: %d", i), "c");
-		h_leg->SetTextSize(0.02);
-		h_leg->AddEntry(h, Form("%s", runName.c_str()), "l");
+		if(!singlePrinter)h_leg->SetHeader(Form("Percentages Channel: %d", i), "c");
+		h_leg->SetTextSize(labelTextSize);
+		if(!singlePrinter)h_leg->AddEntry(h, Form("%s", runName.c_str()), "l");
 		h_leg->SetTextFont(42);
 
 		TAxis *yaxisP = h->GetYaxis();
 		TAxis *xaxisP = h->GetXaxis();
-		yaxisP->SetLabelSize(0.02);
+		yaxisP->SetLabelSize(labelTextSize);
 		yaxisP->SetTitle("Counts");
-		xaxisP->SetLabelSize(0.02);
-		xaxisP->SetTitle("Integral Peak/All");
+		xaxisP->SetLabelSize(labelTextSize);
+		xaxisP->SetTitleSize(labelTextSize);
+		yaxisP->SetTitleSize(labelTextSize);
+
+		xaxisP->SetTitle(Form("f_{W}"));
 
 		double meanP = h->GetMean();
 		double meanErrorP = h->GetMeanError();
 
 		TLine *meanLine = new TLine(meanP, minY, meanP, maxY);
 		meanLine->SetLineColor(2);
-		meanLine->SetLineWidth(1);
+		meanLine->SetLineWidth(lineSize);
 
 		meanLine->Draw();
 
 		TLine *sumPLine = new TLine(sumPercentage, minY, sumPercentage, maxY);
 		sumPLine->SetLineColor(4);
-		sumPLine->SetLineWidth(1);
+		sumPLine->SetLineWidth(lineSize);
 		sumPLine->Draw();
 
 		double pError = abs(meanP - sumPercentage);
@@ -653,17 +687,22 @@ int main(int argc, char *argv[])
 	//	meanLineError->Draw();
 
 		//double mean=gauss->GetParameter(1);
-		h_leg->AddEntry(meanLine, Form("Mean Dist: %1.4lf +- %1.4lf", meanP, meanErrorP), "l");
-		h_leg->AddEntry(sumPLine, Form("Mean Sum: %1.2lf", sumPercentage), "l");
+		h_leg->AddEntry(meanLine, Form("MeanC: %1.4lf +- %1.4lf", meanP, meanErrorP), "l");
+		h_leg->AddEntry(sumPLine, Form("MeanS: %1.4lf", sumPercentage), "l");
 
 		TLine *dummyP = new TLine(0, 0, 0, 0);
 		dummyP->SetLineColorAlpha(4, 0.14);
+		h_leg->AddEntry(dummyP, Form("MeanD: %1.4lf", pError), "l");
 
-		h_leg->AddEntry(dummyP, Form("Deviation: %1.2lf", pError), "l");
 		h_leg->Draw();
 
 		fprintf(file_listP, "%f/%f,", sumPercentage,pError);
+	
+		if(singlePrinter){
+		sumCanvas->Print((outDir + runName + "_"+to_string(i)+"_IntegrationWindow.pdf").c_str());
+		percentageCanvas->Print((outDir + runName +"_"+to_string(i)+ "_PercentageDistribution.pdf").c_str());
 
+		}
 
 	}
 
@@ -686,7 +725,7 @@ int main(int argc, char *argv[])
  *                                                                                   
  */
 
-	string runNameOfCalibration = "2_calib_vb58_tune8650_pcbd";
+	string runNameOfCalibration = "7_calib_vb58_tune8700_pcbd";
 	//Find Content of calibration Run inside text file
 	ifstream data_store(list_filenameP);
 	string lineWithDataCalib;
@@ -723,7 +762,7 @@ int main(int argc, char *argv[])
 
 
 	fprintf(file_listCF, "CF_%s={", string(runName).c_str());
-	for (int i = 0; i < channelNumber; ++i)
+	for (int i = 0; i < channelNumber; i++)
 	{
 		float calibPVal=calibPValues[i];
 		float calibPValError=calibPValuesError[i];
