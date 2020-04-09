@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	bool zoomMode=false;
 	int numberToScaleUp=10010;
 	float dcBinSize = 0.1;
-	int maxX = 1700;
+	int maxX = 900;
 	int min = -100;
 	int numberOfNPE=maxX-min;
 	int bins = numberOfNPE*(1.0/dcBinSize); //0.1 Photoelectron
@@ -226,12 +226,14 @@ int main(int argc, char *argv[])
 	for (string lineWithDataMeasurement_; getline(data_store, lineWithDataMeasurement_);)
 	{
 		
-		string d=split(lineWithDataMeasurement_, "_")[2].substr(2, 3);
-		
+		string d=split(lineWithDataMeasurement_, "_")[2];
+
+		string r=split(d,"=")[0].erase(0,2);
+
 	/*	if (d.find("dc") != std::string::npos) {
 				continue;
 			}*/
-			int runNummerOfThreshold = stoi(d);
+			int runNummerOfThreshold = stoi(r);
 			if (runNr != runNummerOfThreshold)
 			{
 				continue;
@@ -239,6 +241,7 @@ int main(int argc, char *argv[])
 		foundThreshold=true;
 		lineWithDataMeasurement=lineWithDataMeasurement_;
 	}
+
 		cout<<"FOUND THRESHOLD: "<<foundThreshold<<" LINE: "<<lineWithDataMeasurement<<" CURRENT RUN: "<<runName<<endl;
 
 		if(!foundThreshold)return 0;
