@@ -60,10 +60,18 @@ pair<int, int> pos8 = make_pair(160, -160);
 pair<int, int> pos9 = make_pair(160, -510);
 pair<int, int> pos10 = make_pair(204, -404);
 pair<int, int> pos11 = make_pair(310, -360);
-
-
-
-
+pair<int, int> pos12 = make_pair(-320, 0); //Coordinates mapped on the box, not the unit coordinates
+pair<int, int> pos13 = make_pair(320, 0);
+pair<int, int> pos14 = make_pair(0, 407);
+pair<int, int> pos15 = make_pair(0, -407);
+pair<int, int> pos16 = make_pair(0, -160);
+pair<int, int> pos17 = make_pair(0, 160);
+pair<int, int> pos18 = make_pair(-160, 0);
+pair<int, int> pos19 = make_pair(160, 0);
+pair<int, int> pos20 = make_pair(320, -510);
+pair<int, int> pos21 = make_pair(280, -510);
+pair<int, int> pos22 = make_pair(0, -510);
+pair<int, int> pos23 = make_pair(320, -510);
 
 pair<int, int> posWOMD = make_pair(310, -510);
 float calculateDistance(pair<int, int> p1, pair<int, int> p2)
@@ -100,6 +108,31 @@ float getDistanceFromWOMD(int pos)
 		return calculateDistance(posWOMD, pos10);
 	case 11:
 		return calculateDistance(posWOMD, pos11);
+	case 12:
+		return calculateDistance(posWOMD, pos12);
+	case 13:
+		return calculateDistance(posWOMD, pos13);
+	case 14:
+		return calculateDistance(posWOMD, pos14);
+	case 15:
+		return calculateDistance(posWOMD, pos15);
+	case 16:
+		return calculateDistance(posWOMD, pos16);
+	case 17:
+		return calculateDistance(posWOMD, pos17);
+	case 18:
+		return calculateDistance(posWOMD, pos18);
+	case 19:
+		return calculateDistance(posWOMD, pos19);
+	case 20:
+		return calculateDistance(posWOMD, pos20);
+	case 21:
+		return calculateDistance(posWOMD, pos21);
+	case 22:
+		return calculateDistance(posWOMD, pos22);
+	case 23:
+		return calculateDistance(posWOMD, pos23);
+
 	default:
 		return -1000;
 	}
@@ -134,11 +167,6 @@ int main(int argc, char *argv[])
 	gStyle->SetLineStyleString(11, "5 5");
 	gErrorIgnoreLevel = kError;
 
-
-
-
-
-
 	TApplication *myapp = new TApplication("myapp", 0, 0);
 
 	//Output Plot Folder
@@ -169,9 +197,10 @@ int main(int argc, char *argv[])
 	{
 
 		string effName = lineWithDataMeasurement.substr(0, lineWithDataMeasurement.find("=")); //12_pos3_angle0_e52_ch32
-		if (effName.find("dc") != std::string::npos) {
-				continue;
-			}
+		if (effName.find("dc") != std::string::npos)
+		{
+			continue;
+		}
 		vector<string> rawData = split(effName, "_");
 		string runPosRaw = rawData[1];
 
@@ -193,12 +222,10 @@ int main(int argc, char *argv[])
 		c[runPos] = valueTypes;
 		dataMap[runEnergy] = c;
 	}
-		TLegend *h_leg = new TLegend(0.12, 0.12, 0.35, 0.30);
-		h_leg->SetTextSize(0.04);
+	TLegend *h_leg = new TLegend(0.12, 0.12, 0.35, 0.30);
+	h_leg->SetTextSize(0.04);
 
-	
-
-	int colorCounter=1;
+	int colorCounter = 1;
 	for (std::pair<int, map<int, vector<float>>> element : dataMap)
 	{
 		int energy = element.first;
@@ -213,11 +240,12 @@ int main(int argc, char *argv[])
 		{
 			int runPos = posRun.first;
 			vector<float> dat = posRun.second;
-			x.push_back(getDistanceFromWOMD(runPos));
+			float d=getDistanceFromWOMD(runPos);
+			x.push_back(d);
 			y.push_back(dat[0]);
 			yErrU.push_back(dat[1]);
 			yErrL.push_back(dat[2]);
-			printf("Doing Position: %d , Eff: %1.4f (%1.4f,%1.4f)\n", runPos, dat[0], dat[1], dat[2]);
+			printf("Doing Position: %d , Eff: %1.4f (%1.4f,%1.4f), Distance: %1.1f\n", runPos, dat[0], dat[1], dat[2],d);
 		}
 
 		const Int_t n = x.size();
@@ -226,24 +254,22 @@ int main(int argc, char *argv[])
 		gr->SetLineColor(colorCounter);
 		gr->SetLineWidth(2.5);
 		gr->SetMarkerColor(colorCounter);
-		gr->SetMarkerSize(1.2);
-		gr->SetMarkerStyle(20);
+		gr->SetMarkerSize(1.4);
+		gr->SetMarkerStyle(19+colorCounter);
 		gr->GetXaxis()->SetLabelSize(0.085);
 		gr->GetYaxis()->SetLabelSize(0.085);
-		h_leg->AddEntry(gr, Form("Energy: %1.2f GeV",energy/10.0), "p");
+		h_leg->AddEntry(gr, Form("Energy: %1.2f GeV", energy / 10.0), "p");
 
-		TF1 *f1 = new TF1("fit","-[0]*exp(x*[2])+[1]",160,2000);
-		f1->SetParameter(0,0.01);
-		f1->SetParameter(1,100);
-		f1->SetParameter(2,0.009);
+		TF1 *f1 = new TF1("fit", "-[0]*exp(x*[2])+[1]", 160, 2000);
+		f1->SetParameter(0, 0.01);
+		f1->SetParameter(1, 100);
+		f1->SetParameter(2, 0.009);
 		//gr->Fit("fit", "R");
-
-
 
 		mg->Add(gr);
 		gStyle->SetTitleSize(0.2);
 		//mg->SetTitle("Efficiency Measurement");
-		
+
 		colorCounter++;
 	}
 	mg->Draw("AP ");
@@ -251,16 +277,16 @@ int main(int argc, char *argv[])
 	TAxis *yaxisP = mg->GetYaxis();
 	TAxis *xaxisP = mg->GetXaxis();
 	yaxisP->SetLabelSize(0.04);
-	yaxisP->SetTitle("Efficiency [%]");
+	yaxisP->SetTitle("efficiency [%]");
 	yaxisP->SetTitleSize(0.04);
 	xaxisP->SetLabelSize(0.04);
-	xaxisP->SetTitle("Distance [mm]");
+	xaxisP->SetTitle("distance [mm]");
 	xaxisP->SetTitleSize(0.04);
 	h_leg->SetTextFont(42);
 	h_leg->Draw();
 
 	effCanvas->Print((outDir + "PosEfficiency.pdf").c_str());
-	cout<<"This needs to be closed manual, since the ROOT app is running! -> Strg + C"<<endl;
+	cout << "This needs to be closed manual, since the ROOT app is running! -> Strg + C" << endl;
 	myapp->Run();
 
 	return 0;

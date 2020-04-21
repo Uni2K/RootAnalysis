@@ -9,7 +9,7 @@ import re
 import math
 """Get into correct Dir"""
 dirpath = os.getcwd()
-path = "E:\\Messungen\\Skripte\\Auswertung\\"   
+path = "E:\\Master\\Skripte\\Auswertung\\Signifikanz\\"   
 os.chdir( path )
 runs = [
 	#"dc_vb54",
@@ -26,6 +26,49 @@ runs = [
 #Fit the order of runs
 pdes=[0.56,0.6,0.64,0.65,0.655]
 
+def pe_cum_prob(df_pe_slices_prob,pe_val,):
+	slice_cprob = np.zeros( (1,len(pe_val)) ) #1 Row, 30 Columns
+	# sum	
+	for i in range(0,len(pe_val)):
+		slice_cprob[0,i] = df_pe_slices_prob.iloc[i:len(pe_val),0].sum() #Sum over all slices starting from a a npe value-> first value should be near 1
+
+	df_slice_cprob = pd.DataFrame(data=slice_cprob.T,columns=df_pe_slices_prob.columns)
+	#		Integral_ch0
+	#	0       0.015894
+	#	1       0.015445
+
+
+	return df_slice_cprob
+
+def pe_slice_prob(df,pe_val, granularity):
+	slice_names = []
+	for i in pe_val:
+		slice_names.append("N_pe{0}".format(i))	
+
+	sc = 0 # slice counter
+	d_pe_collection = {} 
+
+	for k in pe_val:
+		if k == 0:
+			d_pe_collection[slice_names[sc]] = df.iloc[:,0][(df.iloc[:,0]<k+granularity/2) ] #All Values inside [-inf;0.5]
+			#df.iloc[:,0] choose all values inside the first column (where actually the data is), if they are smaller than 0.5
+		else:
+			d_pe_collection[slice_names[sc]] = df.iloc[:,0][ (df.iloc[:,0]>=k-granularity/2) & (df.iloc[:,0]<k+granularity/2) ] #All Values in [k-0.5;k+0.5]
+		sc = sc+1
+
+	df_pe_slices = pd.DataFrame.from_dict(d_pe_collection) #create DF from slices
+	slice_prob = np.zeros( (1,len(pe_val)) )
+	
+	#Calculate the probability from the entries
+	sc = 0		
+	for i in range(0,len(pe_val)):
+		slice_prob[0,i] = len( df_pe_slices[slice_names[sc]].dropna() ) / len(df) # Probability = events in range / all events
+		sc = sc+1
+
+	df_slice_sum_prob = pd.DataFrame(data=slice_prob.T,columns=df.columns) # new Dataframe with probabilities and column names
+	
+	return df_slice_sum_prob 
+
 
 """Pandas Dataframe-> Datenstruktur"""
 
@@ -37,10 +80,11 @@ channelCount=8
 dcFractionArray=[]
 dcFractionSumArray=[]
 npe_cut=0.5
-tgate=100*10^-9
-photonNrArray=[50]
+#tgate=100*10^-9
+#tgate=0.1*math.pow(10, 0)
+photonNrArray=[1] #just a scale factor -> useless
 pe_val = ([1,2,3,4,5,6])
-pe_val_sum = ([4,5,6,7,8,9,10,11,12]) #Number of PE Prob is calculated for/Thresholds
+pe_val_sum = ([1,2,3,4,5]) #Number of PE Prob is calculated for/Thresholds
 
 #For each run, store the dataframes with the probabilities to print them at the end
 dataFrameArrayProbChannel=[]
@@ -166,7 +210,7 @@ for runID in runs:
 		df_ch_pe_slices = pd.DataFrame.from_dict(d_ch_pe_collection)
 		df_sum_pe_slices = pd.DataFrame.from_dict(d_sum_pe_collection)
 
-		#print(df_ch)
+		print(df_sum_pe_slices)
 		#ALL ROWS-> of i'th colummn
 		#print(df_ch.iloc[:,i][(df_ch.iloc[:,i]<0+0.0) ])
 
@@ -179,6 +223,7 @@ for runID in runs:
 			for i in range(0,len(pe_val)):
 				slice_ch_prob[k,i] = len( df_ch_pe_slices[slice_names[sc]].dropna() ) / len(df_ch)
 				sc = sc+1
+
 		# sum
 		sc = 0		
 		for i in range(0,len(pe_val_sum)):
@@ -192,6 +237,11 @@ for runID in runs:
 
 		df_slice_sum_prob = pd.DataFrame(data=slice_sum_prob.T,columns=df_sum.columns)
 		df_slice_sum_prob = pd.concat([df_pe_val,df_slice_sum_prob],axis=1)
+
+		
+	#	df_pe_slices_prob = pe_slice_prob(pd.DataFrame(),pe_val,1)	
+	#	df_pe_slice_cprob = pe_cum_prob(df_pe_slices_prob,pe_val)
+
 
 		dataFrameArrayProbChannel.append(df_slice_ch_prob)
 		dataFrameArrayProbSum.append(df_slice_sum_prob)
@@ -245,20 +295,24 @@ for runID in runs:
 				for j in range(0,len(pe_val)):  # Für jeden Treshold Wert
 					#numberGreaterThanCut=df_ch[clmns[i]][df_ch[clmns[i]]>npe_cut].dropna().values.size
 					#dcr=math.log(numberGreaterThanCut/numberAllEvents)/tgate
-					dcr=math.log(dataframe[i][j])/tgate
-					g=(photonNrArray[photonNrArray.index(photonNr)]*pdes[runs.index(runID)])/math.sqrt(dcr)
-					dcFractionArray[i][photonNrArray.index(photonNr)][j][runs.index(runID)]=g
+				#	dcr=math.log(dataframe[i][j])/tgate
+					#g=(photonNrArray[photonNrArray.index(photonNr)]*pdes[runs.index(runID)])/math.sqrt(dcr)
+					dcFractionArray[i][photonNrArray.index(photonNr)][j][runs.index(runID)]=0
+
 
 for runID in runs:
 	for photonNr in photonNrArray: 
 		for dataframe in dataFrameArrayCProbSum:
-				for j in range(0,len(pe_val_sum)):  # Für jeden Treshold Wert
+				for p in range(0,len(pe_val_sum)):  # Für jeden Treshold Wert
 					#numberGreaterThanCut=df_ch[clmns[i]][df_ch[clmns[i]]>npe_cut].dropna().values.size
 					#dcr=math.log(numberGreaterThanCut/numberAllEvents)/tgate
-					print(dataframe[0][j])
-					dcr=math.log(dataframe[0][j])/tgate
+					#print(dataframe[0][j])
+					v=dataframe[0][p]
+					#dcr=math.log(v)/tgate
+					dcr=v
+
 					g=(photonNrArray[photonNrArray.index(photonNr)]*pdes[runs.index(runID)])/math.sqrt(dcr)
-					dcFractionSumArray[photonNrArray.index(photonNr)][j][runs.index(runID)]=g
+					dcFractionSumArray[photonNrArray.index(photonNr)][p][runs.index(runID)]=g
 
 
 
@@ -291,12 +345,11 @@ dcFractionSumArray[photonNrArray.index(photonNr)][runs.index(runID)]=g'''
 ## PLOTS ##
 ###########
 
-fig0, ax0 = plt.subplots( nrows=3, ncols=3, figsize=(15,12) )
-
-ax_chB = []
-for i in range(0,3):
-	for k in range(0,3):
-		ax_chB.append(ax0[i,k])
+ax0 = plt.subplot( )
+#ax_chB = []
+#for i in range(0,3):
+	#for k in range(0,3):
+	#	ax_chB.append(ax0[i,k])
 
 voltage_array=[]
 for j in range(0,runCount):
@@ -322,7 +375,7 @@ for a in range(0,len(pe_val)):
 	lines.append(0)
 	labels.append(0)
 
-for i in range(0, channelCount):
+""" for i in range(0, channelCount):
 	ax = ax_chB[i]
 	ax.set_ylim(0,np.amax(dcFractionArray)+5)
 	ax.set_ylabel("$N_{\gamma}\epsilon (V) / \sqrt{DC} $", fontsize=7)
@@ -344,7 +397,7 @@ for i in range(0, channelCount):
 				ax.annotate('%s' % label, xy=xy, textcoords='data',fontsize=7) 
 		
 
-
+ """
 
 lines2=[]
 labels2=[]
@@ -353,30 +406,29 @@ for a in range(0,len(pe_val_sum)):
 	labels2.append(0)
 for j in range(0, len(photonNrArray)):
 	for o in range(0,len(dcFractionSumArray[j])):
-		ax = ax_chB[channelCount]
-		
+		ax = ax0
 		x=ax.plot(voltage_array,dcFractionSumArray[j][o],marker='o',markersize=3)
 		lines2[o]=x
 		labels2[o]="N_pe={}".format(pe_val_sum[o])
 		for xy in zip(voltage_array, dcFractionSumArray[j][o]):                                       # <--
 			label=round(dataFrameArrayCProbSum[voltage_array.index(xy[0])][0][o]*100,2)
-			ax.annotate('%s' % label, xy=xy, textcoords='data',fontsize=7) 
-		ax.set_ylim(0,np.amax(dcFractionSumArray)+5)
-		ax.set_ylabel("$N_{\gamma}\epsilon (V) / \sqrt{DC} $", fontsize=7)
-		ax.set_xlabel("$V_{bias}$")
-		ax.tick_params(axis='y', which='major', labelsize=5)
-		ax.tick_params(axis='y', which='minor', labelsize=5)
-		ax.tick_params(axis='x', which='major', labelsize=6)
-		ax.tick_params(axis='x', which='minor', labelsize=7)
-		ax.set_title("Sum Channel",fontsize=10)
+			ax.annotate('%s' % label, xy=xy, textcoords='data',fontsize=17) 
+		ax.set_ylim(0,np.amax(dcFractionSumArray)+0.5)
+		ax.set_ylabel("$\epsilon (V) / \sqrt{P_{DC}} $", fontsize=20)
+		ax.set_xlabel("$V_{bias}$", fontsize=20)
+		ax.tick_params(axis='y', which='major', labelsize=17)
+		ax.tick_params(axis='y', which='minor', labelsize=17)
+		ax.tick_params(axis='x', which='major', labelsize=17)
+		ax.tick_params(axis='x', which='minor', labelsize=17)
+	#	ax.set_title("Sum Channel",fontsize=13)
 
 
 
 
 
 
-plt.figlegend( lines,labels=labels,loc = 'upper left', labelspacing=0.,prop={'size': 8})
-plt.figlegend( lines2,labels=labels2,loc = 'upper right', labelspacing=0.,prop={'size': 8})
+#plt.figlegend( lines,labels=labels,loc = 'lower left', labelspacing=2.,prop={'size': 13})
+plt.figlegend( lines2,labels=labels2,loc = 'lower left', labelspacing=0.1,prop={'size': 15})
 
 
 ##fig2, (ax2, ax3) = plt.subplots(nrows=2, ncols=1) # two axes on figure
@@ -386,8 +438,8 @@ plt.figlegend( lines2,labels=labels2,loc = 'upper right', labelspacing=0.,prop={
 
 
 #print(dcFractionArray)
-plt.subplots_adjust(left=0.08, right=0.97, top=0.85, bottom=0.06, hspace=0.48, wspace=0.23)
-fig0.suptitle("Significance")
+#plt.subplots_adjust(left=0.08, right=0.97, top=0.85, bottom=0.06, hspace=0.48, wspace=0.23)
+#fig0.suptitle("Significance")
 plt.show()
 
 

@@ -15,6 +15,9 @@
         "BaselineAverage.C": "cpp",
         "chrono": "cpp",
         "ostream": "cpp",
-        "misc.C": "cpp"
+        "misc.C": "cpp",
+        "Efficiency.C": "cpp",
+        "xstring": "cpp",
+        "EfficiencyPos.C": "cpp"
     }
 }

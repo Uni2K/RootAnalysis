@@ -37,6 +37,7 @@
 #include <TGraph.h>
 #include "TSpectrum.h"
 #include "TVirtualFitter.h"
+#include <TApplication.h> // open root gui
 
 
 
@@ -206,13 +207,15 @@ int smoothDefault=1500;
 
 int peakLeftThreshold=100;
 int peakRightThreshold= 280;
-bool singlePrinter=false;
+bool singlePrinter=true;
 
 float labelTextSize=0.02;
 int lineSize=2;
 
 int main(int argc, char *argv[])
 {
+
+
 	gStyle->SetOptStat(0);
 	gStyle->SetGridStyle(3);
 	gStyle->SetGridWidth(1);
@@ -225,10 +228,10 @@ int main(int argc, char *argv[])
 	gErrorIgnoreLevel = kError;
 
 	if(singlePrinter){
-		labelTextSize=0.045;
+		labelTextSize=0.05;
 		lineSize=4;
 	}
-
+	
 
 	string runName = (string)argv[1];
 	int runNr = atoi(argv[2]);
@@ -566,6 +569,9 @@ int main(int argc, char *argv[])
 
 			sumHist->GetXaxis()->SetRangeUser(means[0] - integrationLeftOffset, minInRange);
 
+
+
+
 			sumHist->SetFillColorAlpha(kTeal+2, 0.9);
 
 			sumHist->SetFillStyle(1001);
@@ -586,6 +592,8 @@ int main(int argc, char *argv[])
 
 			//Reset -> Needs to be done
 			sumHist->GetXaxis()->SetRangeUser(0, 320);
+			sumHist->GetXaxis()->SetRangeUser(0, 320);
+
 			sumHist->SetFillColorAlpha(0, 0.0);
 
 			for (int i = 0; i < npeaks; ++i)
@@ -596,7 +604,7 @@ int main(int argc, char *argv[])
 			sumHist->SetFillStyle(3001);
 			minLine->Draw();
 			leftLine->Draw();
-			baselineUsed->Draw();
+			if(!singlePrinter)baselineUsed->Draw();
 			if(!singlePrinter)putc->Draw("same");
 
 			fprintf(file_list, "%f/%f,", minInRange - means[0], entireSignalRight - means[0]);
@@ -660,10 +668,10 @@ int main(int argc, char *argv[])
 		yaxisP->SetLabelSize(labelTextSize);
 		yaxisP->SetTitle("Counts");
 		xaxisP->SetLabelSize(labelTextSize);
+		
+		xaxisP->SetTitle(Form("f_{W}"));
 		xaxisP->SetTitleSize(labelTextSize);
 		yaxisP->SetTitleSize(labelTextSize);
-
-		xaxisP->SetTitle(Form("f_{W}"));
 
 		double meanP = h->GetMean();
 		double meanErrorP = h->GetMeanError();
@@ -778,6 +786,5 @@ int main(int argc, char *argv[])
 	}
 	fprintf(file_listCF, "}\n");
 	fclose(file_listCF);
-
 	return 0;
 }

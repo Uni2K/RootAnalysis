@@ -208,6 +208,25 @@ int main(int argc, char *argv[])
 	float thresholdErrorM = -1;
 
 
+	switch (runNr)
+	{
+	case 86:
+		numberToScaleUp=30030;
+		break;
+	case 87:
+		numberToScaleUp=11011;
+		break;
+	
+	default:
+		numberToScaleUp=10010;
+		break;
+	}
+
+
+
+
+
+
 
 	std::ifstream inFile(thresholdsFile);
 	int numberOfLines = std::count(std::istreambuf_iterator<char>(inFile),
@@ -241,8 +260,11 @@ int main(int argc, char *argv[])
 		foundThreshold=true;
 		lineWithDataMeasurement=lineWithDataMeasurement_;
 	}
-
-		cout<<"FOUND THRESHOLD: "<<foundThreshold<<" LINE: "<<lineWithDataMeasurement<<" CURRENT RUN: "<<runName<<endl;
+		
+		cout<<""<<endl;
+		cout<<"\nCURRENT RUN: "<<runName<<endl;
+		cout<<"FOUND THRESHOLD: "<<foundThreshold<<endl;
+		cout<<"LINE: "<<lineWithDataMeasurement<<endl;
 
 		if(!foundThreshold)return 0;
 
@@ -333,25 +355,68 @@ int main(int argc, char *argv[])
 		tree->Draw("chargeChannelSumWOMErrorP[3]>>cuttedHistErrorP", cutNum2);
 		tree->Draw("chargeChannelSumWOMErrorM[3]>>cuttedHistErrorM", cutNum3);
 
-		float efficiency = ((numberToScaleUp-( allHist->GetEntries()-cuttedHist->GetEntries()))/numberToScaleUp) * 100;
-		float efficiencyErrorP =((numberToScaleUp-( allHistErrorP->GetEntries()-cuttedHistErrorP->GetEntries()))/numberToScaleUp) * 100;
-		float efficiencyErrorM =((numberToScaleUp-( allHistErrorM->GetEntries()-cuttedHistErrorM->GetEntries()))/numberToScaleUp) * 100;
+
+		int entry_temp=allHist->GetEntries();
+		int entryP_temp=allHistErrorP->GetEntries();
+		int entryM_temp=allHistErrorM->GetEntries();
+
+		int entryC_temp=cuttedHist->GetEntries();
+		int entryCP_temp=cuttedHistErrorP->GetEntries();
+		int entryCM_temp=cuttedHistErrorM->GetEntries();
+		//There are maybe entries skipped due to exceeding events, since they need to be counted as detected, the numbers need to be adjusted
+		
+		cout<<"Raw Entries All: "<<entry_temp<<"/"<<entryC_temp<<endl;
+		cout<<"Raw Entries P: "<<entryP_temp<<"/"<<entryCP_temp<<endl;
+		cout<<"Raw Entries M: "<<entryM_temp<<"/"<<entryCM_temp<<endl;
 
 
 
 
-		float deviationP = abs(efficiencyErrorP - efficiency);
-		float deviationM = abs(efficiencyErrorM - efficiency);
-		float maxDeviation = max(deviationM, deviationP);
+		int skippedEntries=numberToScaleUp-entry_temp;
+		int skippedEntriesP=numberToScaleUp-entryP_temp;
+		int skippedEntriesM=numberToScaleUp-entryM_temp;
 
-		double upperStatErr = abs(efficiency - TEfficiency().ClopperPearson(allHist->GetEntries(), cuttedHist->GetEntries(), 0.682689492137, true) * 100);
-		double lowerStatErr = abs(efficiency - TEfficiency().ClopperPearson(allHist->GetEntries(), cuttedHist->GetEntries(), 0.682689492137, false) * 100);
+		if(skippedEntries<0){
+			cout<<"Scale UP ERROR, histogram has: "<<entry_temp<<" entries, but numberToScaleUp is: "<<numberToScaleUp<<endl;
+			assert(0);
+		}
+		cout<<"Skipped: All: "<<skippedEntries<<"  P: "<<skippedEntriesP<<" M: "<< skippedEntriesM<<endl;
+
+		if(!((skippedEntries == skippedEntriesM) && (skippedEntries== skippedEntriesP))){
+			cout<<"The entries in the Error distributions do not match. Something went wrong on analysis."<<endl;
+			
+			assert(0);
+		}
+
+		//Adjusting the numbers -> Adding the skipped ones
+		float entry=entry_temp+skippedEntries;
+		float entryP=entryP_temp+skippedEntries;
+		float entryM=entryM_temp+skippedEntries;
+
+		float entryC=entryC_temp+skippedEntries;
+		float entryCP=entryCP_temp+skippedEntries;
+		float entryCM=entryCM_temp+skippedEntries;
+
+
+		float efficiency =  (entryC/entry)* 100;
+		float efficiencyP = (entryCP/entryP)* 100;
+		float efficiencyM = (entryCM/entryM)* 100;
+
+
+
+
+		float deviationP = abs(efficiencyP - efficiency);
+		float deviationM = abs(efficiencyM - efficiency);
+		//float maxDeviation = max(deviationM, deviationP);
+
+		double upperStatErr = abs(efficiency - TEfficiency().ClopperPearson(entry, entryC, 0.682689492137, true) * 100);
+		double lowerStatErr = abs(efficiency - TEfficiency().ClopperPearson(entry, entryC, 0.682689492137, false) * 100);
 
 		float combinedUpperError = sqrt(pow(upperStatErr, 2) + pow(deviationP, 2));
 		float combinedLowerError = sqrt(pow(lowerStatErr, 2) + pow(deviationM, 2));
-
-		cout << "Run: " << runName << "  EffErrP: " << efficiencyErrorP << "  All: " << allHistErrorP->GetEntries() << "  Cut: " << cuttedHistErrorP->GetEntries() << endl;
-		cout << "Run: " << runName << "  EffErrM: " << efficiencyErrorM << "  All: " << allHistErrorM->GetEntries() << "  Cut: " << cuttedHistErrorM->GetEntries() << endl;
+		cout << "Run: " << runName << "  Unscaled All: " << entry_temp << "  Cut: " << entryC_temp << endl;
+		cout << "Run: " << runName << "  EffErrP: " << efficiencyP << "  Unscaled All: " << entryP_temp << "  Cut: " << entryCP_temp << endl;
+		cout << "Run: " << runName << "  EffErrM: " << efficiencyM << "  Unscaled All: " << entryM_temp << "  Cut: " << entryCM_temp << endl;
 		//cout << "Run: " << runName <<"  Efficiency: "<<efficiency <<"+/- "<<deviationP<<"/"<<deviationM<<"  All: " <<allHist->GetEntries()<<"  Cut: " <<cuttedHist->GetEntries()<< endl;
 
 		printf("Run: %s, Efficiency: %1.4f [%1.4f,%1.4f] ", runName.c_str(), efficiency, deviationP, deviationM);
@@ -359,10 +424,10 @@ int main(int argc, char *argv[])
 		TAxis *yaxisP = allHist->GetYaxis();
 		TAxis *xaxisP = allHist->GetXaxis();
 		yaxisP->SetLabelSize(0.04);
-		yaxisP->SetTitle("Counts");
+		yaxisP->SetTitle("counts");
 		yaxisP->SetTitleSize(0.04);
 		xaxisP->SetLabelSize(0.04);
-		xaxisP->SetTitle("Integral");
+		xaxisP->SetTitle("integral");
 		xaxisP->SetTitleSize(0.04);
 
 		allHist->Draw("hist");
@@ -385,7 +450,7 @@ int main(int argc, char *argv[])
 
 		TLegend *h_leg = new TLegend(0.50, 0.62, 0.90, 0.90);
 		h_leg->SetTextSize(0.03);
-		h_leg->AddEntry(allHist, Form("Entries: %1.1lf, Cutted: %1.1lf ", allHist->GetEntries(),cuttedHist->GetEntries()), "f");
+		h_leg->AddEntry(allHist, Form("Entries: %1.1f, Cutted: %1.1f ", entry,entryC), "f");
 		//h_leg->AddEntry(limit, Form("Threshold from: %s", thresholdName.c_str()), "l");
 		h_leg->AddEntry(limit, Form("#Lambda_{thr}: %1.2f (+%1.2f -%1.2f)", threshold, sumCutErrorP,sumCutErrorM), "l");
 		h_leg->AddEntry(limit, Form("P_{thr}: %1.2f (+%1.2f -%1.2f%s)", sumPercentage, sumPercentageErrorP,sumPercentageErrorM, "%"), "l");

@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 		gPad->SetGridy();
 		gPad->SetRightMargin(0.00);
 		gPad->SetLeftMargin(.12);
+		gPad->SetBottomMargin(.12);
 
 		c_name1.Form("c%d", i);
 		h_name1.Form("h%d", i);
@@ -136,7 +137,10 @@ int main(int argc, char *argv[])
 		h_vec[i]->SetMarkerColorAlpha(kBlack, 0.6);
 		h_vec[i]->SetTitle(Form("baseline fit, red. #chi^{2} , ch%d", channel));
 		h_vec[i]->GetXaxis()->SetTitle("#chi_{red}^{2}");
-		h_vec[i]->GetYaxis()->SetTitle("entries");
+		h_vec[i]->GetYaxis()->SetTitle("counts");
+		h_vec[i]->GetYaxis()->SetTitleSize(0.05);
+		h_vec[i]->GetXaxis()->SetTitleSize(0.05);
+
 		tree->Draw(draw_cmnd1, "", "HISTE");
 
 		/***** 
@@ -177,6 +181,7 @@ int main(int argc, char *argv[])
 		gPad->SetRightMargin(0.00);
 		gPad->SetLeftMargin(.12);
 		// gPad->SetLogy(); gPad->SetGridx(); gPad->SetGridy();
+		gPad->SetBottomMargin(.12);
 
 		h_vec[i + 8] = new TH1F(h_name2, h_title2, binX, -5, 8);
 		h_vec[i + 8]->SetLineColor(kBlue);
@@ -190,8 +195,10 @@ int main(int argc, char *argv[])
 		h_vec[i + 8]->SetMarkerColorAlpha(kBlack, 0.6);
 		h_vec[i + 8]->SetTitle(Form("baseline fit, ch%d", channel));
 
-		h_vec[i + 8]->GetYaxis()->SetTitle("entries");
+		h_vec[i + 8]->GetYaxis()->SetTitle("counts");
 		h_vec[i + 8]->GetXaxis()->SetTitle(xTitle2);
+		h_vec[i+8]->GetYaxis()->SetTitleSize(0.05);
+		h_vec[i+8]->GetXaxis()->SetTitleSize(0.05);
 		tree->Draw(draw_cmnd2, cut_cmnd2, "goff");
 
 		/***** 
@@ -213,7 +220,7 @@ int main(int argc, char *argv[])
 		h_vec[i + 8]->Draw();
 
 		TLegend *h_BL_leg = new TLegend(0.55, 0.55, 1.0, 0.9);
-		h_BL_leg->SetTextSize(0.03);
+		h_BL_leg->SetTextSize(0.035);
 		h_BL_leg->AddEntry(h_vec[i + 8], Form("#bf{B_{dyn}(#chi_{red}^{2} #leq #chi_{cut}^{2}) }"), "elpf");
 		//h_BL_leg->AddEntry((TObject*)0,Form("entries = %1.f",h_vec[i+8]->GetEntries()),"");
 		h_BL_leg->AddEntry(fit_BL_vec[i], Form("Gaussian fit:"), "l");
