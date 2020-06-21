@@ -84,7 +84,7 @@ npe_cut=0.5
 #tgate=0.1*math.pow(10, 0)
 photonNrArray=[1] #just a scale factor -> useless
 pe_val = ([1,2,3,4,5,6])
-pe_val_sum = ([1,2,3,4,5]) #Number of PE Prob is calculated for/Thresholds
+pe_val_sum = ([7,8,9,10,11]) #Number of PE Prob is calculated for/Thresholds
 
 #For each run, store the dataframes with the probabilities to print them at the end
 dataFrameArrayProbChannel=[]
@@ -300,20 +300,22 @@ for runID in runs:
 					dcFractionArray[i][photonNrArray.index(photonNr)][j][runs.index(runID)]=0
 
 
-for runID in runs:
-	for photonNr in photonNrArray: 
-		for dataframe in dataFrameArrayCProbSum:
-				for p in range(0,len(pe_val_sum)):  # Für jeden Treshold Wert
-					#numberGreaterThanCut=df_ch[clmns[i]][df_ch[clmns[i]]>npe_cut].dropna().values.size
+counter=0
+for dataframe in dataFrameArrayCProbSum:
+	for p in range(0,len(pe_val_sum)):  # Für jeden Treshold Wert
+				#numberGreaterThanCut=df_ch[clmns[i]][df_ch[clmns[i]]>npe_cut].dropna().values.size
 					#dcr=math.log(numberGreaterThanCut/numberAllEvents)/tgate
 					#print(dataframe[0][j])
 					v=dataframe[0][p]
 					#dcr=math.log(v)/tgate
 					dcr=v
-
-					g=(photonNrArray[photonNrArray.index(photonNr)]*pdes[runs.index(runID)])/math.sqrt(dcr)
-					dcFractionSumArray[photonNrArray.index(photonNr)][p][runs.index(runID)]=g
-
+					if dcr==0:
+						g=1
+					else:
+						eff=pdes[counter]
+						g=(eff)/math.sqrt(dcr)
+					dcFractionSumArray[photonNrArray.index(photonNr)][p][counter]=g
+	counter=counter+1
 
 
 
@@ -369,35 +371,6 @@ for j in range(0,runCount):
 
 
 
-lines=[]
-labels=[]
-for a in range(0,len(pe_val)):
-	lines.append(0)
-	labels.append(0)
-
-""" for i in range(0, channelCount):
-	ax = ax_chB[i]
-	ax.set_ylim(0,np.amax(dcFractionArray)+5)
-	ax.set_ylabel("$N_{\gamma}\epsilon (V) / \sqrt{DC} $", fontsize=7)
-	ax.set_xlabel("$V_{bias}$")
-	ax.tick_params(axis='y', which='major', labelsize=5)
-	ax.tick_params(axis='y', which='minor', labelsize=5)
-	ax.tick_params(axis='x', which='major', labelsize=6)
-	ax.tick_params(axis='x', which='minor', labelsize=7)
-	ax.set_title("Channel: {} ".format(i),fontsize=10)
-	for j in range(0, len(photonNrArray)):
-		for o in range(0,len(dcFractionArray[i][j])):
-			x=ax.plot(voltage_array,dcFractionArray[i][j][o],marker='o',markersize=3)
-			lines[o]=x
-			labels[o]="N_pe={}".format(pe_val[o])
-		#	ax.legend(loc="best", prop={'size': 6})
-			for xy in zip(voltage_array, dcFractionArray[i][j][o]):                                       # <--
-				#print(xy)
-				label=round(dataFrameArrayCProbChannel[voltage_array.index(xy[0])][i][o]*100,2)
-				ax.annotate('%s' % label, xy=xy, textcoords='data',fontsize=7) 
-		
-
- """
 
 lines2=[]
 labels2=[]
@@ -415,7 +388,7 @@ for j in range(0, len(photonNrArray)):
 			ax.annotate('%s' % label, xy=xy, textcoords='data',fontsize=17) 
 		ax.set_ylim(0,np.amax(dcFractionSumArray)+0.5)
 		ax.set_ylabel("$\epsilon (V) / \sqrt{P_{DC}} $", fontsize=20)
-		ax.set_xlabel("$V_{bias}$", fontsize=20)
+		ax.set_xlabel("$U_{set} [mV]$", fontsize=20)
 		ax.tick_params(axis='y', which='major', labelsize=17)
 		ax.tick_params(axis='y', which='minor', labelsize=17)
 		ax.tick_params(axis='x', which='major', labelsize=17)

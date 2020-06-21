@@ -107,7 +107,10 @@ sumXMax=30
 channelXMin=-1.5
 sumXMin=-5.5
 
-threshold=0.05 #Percentage
+#threshold=0.05 #Percentage
+threshold=0.5 #0.5NPE
+
+tresholdMode=1 #0 -> Find NPE, 1 -> Find Percentage 
 
 pe_val = np.zeros(npe_number+1)
 for i in range(npe_number+1):
@@ -290,10 +293,20 @@ for branch in range(0,3):
 				ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="step",color=ch_hist_color,alpha=0.8, log=logEnabled,label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]),zorder=2,density=False)
 
 
-				probMatchingPercent=df_cprob[df_cprob.iloc[:, (k+i*9)+1] <= threshold]
+				
+				if tresholdMode:
+					matchingEntry=df_cprob[df_cprob.iloc[:,1] <= threshold]
+				else:
+					matchingEntry=df_cprob[df_cprob.iloc[:, (k+i*9)+1] <= threshold]
 
-				rowOfMatching=probMatchingPercent.iloc[0,0]
-				percentageOfMatching=probMatchingPercent.iloc[0,(k+i*9)+1]
+				
+
+
+			
+				rowOfMatching=matchingEntry.iloc[0,0]
+				percentageOfMatching=matchingEntry.iloc[0,(k+i*9)+1]
+
+
 				file.write("{:1.2f}/{:1.4f},".format(rowOfMatching,percentageOfMatching)) 	
 
 				#display(probMatchingPercent)
