@@ -127,9 +127,6 @@ float calculateDistance(pair<int, int> p1, pair<int, int> p2)
 	return sqrt(pow(p1.first - p2.first, 2) + pow(p1.second - p2.second, 2));
 }
 
-
-
-
 int main(int argc, char *argv[])
 {
 	TApplication *myapp = new TApplication("myapp", 0, 0);
@@ -141,9 +138,96 @@ int main(int argc, char *argv[])
 	gStyle->SetLineScalePS(1);
 	gStyle->SetStatW(0.2);
 	gStyle->SetStatH(0.2);
-	gStyle->SetLineStyleString(11, "5 5");
 
-	TCanvas *c = new TCanvas("c", "Graph2D example", 0, 0,1000, 1000);
+
+
+	TFile *file = new TFile("../rootfiles/58_pos6_angle30_e14_ch32.root");
+	if (file->IsZombie())
+	{
+		cout << "PROBLEM with the initialization of the output ROOT ntuple "
+			 << ": check that the path is correct!!!"
+			 << endl;
+
+		exit(-1);
+	}
+	TTree *tree;
+	file->GetObject("T", tree);
+
+		int bins=100;
+		int maxX=10000;
+		int min=-10;
+
+		TCanvas *c = new TCanvas("c", "Graph2D example", 0, 0, 1800, 1000);
+
+		THStack *hs = new THStack("hs","");
+
+		TH1D *allHist = new TH1D("allHist", "", bins, min, maxX);
+		allHist->SetFillColorAlpha(kBlue, 0.4);
+		allHist->SetLineColorAlpha(1, 0);
+
+
+		TH1D *allHistErrorP = new TH1D("allHistErrorP", "", bins, min, maxX);
+		TH1D *allHistErrorM = new TH1D("allHistErrorM", "", bins, min, maxX);
+
+		TLegend *h_leg = new TLegend(0.50, 0.62, 0.90, 0.90);
+		h_leg->SetTextSize(0.03);
+	
+
+
+		tree->Draw("Integral[1]>>allHist", "");
+		tree->Draw("IntegralErrorP[2]>>allHistErrorP", "");
+		tree->Draw("IntegralErrorM[2]>>allHistErrorM", "");
+
+
+		
+
+		float mean=allHist->GetMean();
+		float meanErrorP=allHistErrorP->GetMean();
+		float meanErrorM=allHistErrorM->GetMean();
+		float cf=1.16818;
+		float dcf=0.077463;
+		
+
+		h_leg->AddEntry(allHist, Form("unshifted PCS, mean: %1.0f",mean), "f");
+		h_leg->AddEntry(allHistErrorP, Form("up-shifted PCS, mean: %1.0f",meanErrorP), "l");
+		h_leg->AddEntry(allHistErrorM, Form("down-shifted PCS, mean: %1.0f",meanErrorM), "l");
+		h_leg->AddEntry((TObject *)0, Form("CF: %1.2f #pm %1.2f",cf,dcf), "");
+
+
+
+		allHistErrorP->SetLineWidth(3);
+		allHistErrorM->SetLineWidth(3);
+		
+		allHistErrorP->SetLineColorAlpha(4, 1);
+		allHistErrorM->SetLineColorAlpha(2, 1);
+
+		
+
+
+ 		hs->Add(allHist);
+ 		hs->Add(allHistErrorP);
+ 		hs->Add(allHistErrorM);
+
+		hs->Draw("nostack");
+
+		TAxis *yaxisP = hs->GetYaxis();
+		TAxis *xaxisP =hs->GetXaxis();
+		yaxisP->SetLabelSize(0.04);
+		yaxisP->SetTitle("counts");
+		yaxisP->SetTitleSize(0.04);
+		xaxisP->SetLabelSize(0.04);
+		xaxisP->SetTitle("integral [mV #times ns]");
+		xaxisP->SetTitleSize(0.04);
+
+		h_leg->Draw();
+		c->Print("test.pdf");
+		myapp->Run();
+
+
+
+
+
+	/*TCanvas *c = new TCanvas("c", "Graph2D example", 0, 0, 1000, 1000);
 	Double_t x, y, z, P = 6.;
 	Int_t np = 200;
 	TGraph2D *dt = new TGraph2D();
@@ -152,97 +236,80 @@ int main(int argc, char *argv[])
 	int xMax = 400;
 	int yMin = -600;
 	int yMax = 600;
-	int pixelSize=5; 
+	int pixelSize = 5;
 	pair<int, int> posWOMD = make_pair(310, -510);
 
-	int numberRows = 1200/pixelSize;
-	int numberColumns = 800/pixelSize;
+	int numberRows = 1200 / pixelSize;
+	int numberColumns = 800 / pixelSize;
 	int index = 0;
 
+	TF1 *low = new TF1("fit", "-[0]*exp(x*[2])+[1]", 0, 5000);
+	low->SetParameter(0, 3.08772e-04);
+	low->SetParameter(1, 9.98528e+01);
+	low->SetParameter(2, 9.79445e-03);
 
-	TF1 *low = new TF1("fit","-[0]*exp(x*[2])+[1]",0,5000);
-	low->SetParameter(0,3.08772e-04);
-	low->SetParameter(1,9.98528e+01);
-	low->SetParameter(2,9.79445e-03);
+	TF1 *mid = new TF1("fit", "-[0]*exp(x*[2])+[1]", 0, 5000);
+	mid->SetParameter(0, 7.85506e-04);
+	mid->SetParameter(1, 9.99429e+01);
+	mid->SetParameter(2, 7.63927e-03);
 
-TF1 *mid = new TF1("fit","-[0]*exp(x*[2])+[1]",0,5000);
-	mid->SetParameter(0,7.85506e-04);
-	mid->SetParameter(1,9.99429e+01);
-	mid->SetParameter(2,7.63927e-03);
+	TF1 *high = new TF1("fit", "-[0]*exp(x*[2])+[1]", 0, 5000);
+	high->SetParameter(0, 1.54281e-08);
+	high->SetParameter(1, 9.99753e+01);
+	high->SetParameter(2, 1.97434e-02);
 
-TF1 *high = new TF1("fit","-[0]*exp(x*[2])+[1]",0,5000);
-	high->SetParameter(0,1.54281e-08);
-	high->SetParameter(1,9.99753e+01);
-	high->SetParameter(2,1.97434e-02);
-
-
-
-
-	for (Int_t rowIndex = yMin; rowIndex < yMax; rowIndex=rowIndex+pixelSize)
+	for (Int_t rowIndex = yMin; rowIndex < yMax; rowIndex = rowIndex + pixelSize)
 	{
 
-		for (Int_t columnIndex = xMin; columnIndex < xMax; columnIndex=columnIndex+pixelSize)
+		for (Int_t columnIndex = xMin; columnIndex < xMax; columnIndex = columnIndex + pixelSize)
 		{
 			pair<int, int> point = make_pair(columnIndex, rowIndex);
 			float distance = calculateDistance(posWOMD, point);
 			float value = mid->Eval(distance);
-			if(value<99.0){
-				value=99.0;
+			if (value < 99.0)
+			{
+				value = 99.0;
 			}
 			dt->SetPoint(index, columnIndex, rowIndex, value);
-			
-			index++;
 
+			index++;
 		}
 	}
 
-		dt->SetPoint(index, 0, 0, 100.00);
-			index++;
+	dt->SetPoint(index, 0, 0, 100.00);
+	index++;
 
-		dt->SetPoint(index, 100, 100, 100.00);
+	dt->SetPoint(index, 100, 100, 100.00);
 
 	//gStyle->SetPalette(1);
-
-
 
 	/*UInt_t Number = 6;
    Double_t Red[Number]    = {1,1,1,1,1,1};
    Double_t Green[Number]  = {1,1,0.7,0.5,0,0};
    Double_t Blue[Number]   = {1,1,0,0,0,0};
    Double_t Length[Number] = {0,0.99000,0.99800,0.99850,0.99870,0.99875};
-   */
+   
 
-UInt_t Number = 12;
-   Double_t Red[Number]    = {1,1,1	,0,0,0,0,0.333,0.666,1,1,1,1};
-   Double_t Green[Number]  = {1,1,1	,1,1,1,1,1,1,0.666,0.333,0,0};
-   Double_t Blue[Number]   = {1,1,1,	1,0.666,0.333,0,0,0,0,0,0,1};
-   Double_t Length[Number] = {0.00000,0.99000,0.99002,0.99100,0.99200,0.99300,0.99400,0.99500,0.99600,0.99700,0.99800,0.99825,0.99850};
+	UInt_t Number = 12;
+	Double_t Red[Number] = {1, 1, 1, 0, 0, 0, 0, 0.333, 0.666, 1, 1, 1, 1};
+	Double_t Green[Number] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0.666, 0.333, 0, 0};
+	Double_t Blue[Number] = {1, 1, 1, 1, 0.666, 0.333, 0, 0, 0, 0, 0, 0, 1};
+	Double_t Length[Number] = {0.00000, 0.99000, 0.99002, 0.99100, 0.99200, 0.99300, 0.99400, 0.99500, 0.99600, 0.99700, 0.99800, 0.99825, 0.99850};
 
-  	 Int_t nb=30900;
-//	TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nb);
+	Int_t nb = 30900;
+	//	TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nb);
 	gStyle->SetNumberContours(nb);
 
- 	dt->GetXaxis()->SetLabelOffset(0.01);
+	dt->GetXaxis()->SetLabelOffset(0.01);
 	dt->GetXaxis()->SetLabelSize(0.1);
 
 	//dt->Draw("TRI2 Z ");
 	dt->Draw("TRI2 Z");
 
-	
-
 	//c->SetTheta(90.0-0.001);
 	//c->SetPhi(0.0+0.001);
 
-
-
-
-
-
-
-
-
 	dt->Print("test.pdf");
-	
 
 	myapp->Run();
 

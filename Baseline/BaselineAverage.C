@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 
 	int Xmin = 0;
 	int Xmax = 10;
-	int binX = 120;
+	int binX = 320;
 	float bin_w = (float)Xmax / binX;
 
 	float alpha = 0.1;
@@ -217,15 +217,29 @@ int main(int argc, char *argv[])
 		sigma_BL[i] = fit_BL_vec[i]->GetParameter(2);
 		sigma_BL_err[i] = fit_BL_vec[i]->GetParError(2);
 
+
+		//Alternative
+		/*mean_BL[i] = h_vec[i + 8]->GetMean();
+		mean_BL_err[i] = h_vec[i + 8]->GetMeanError();
+		sigma_BL[i] = 0;*/
+		sigma_BL_err[i] = 0;
+
+    	
 		h_vec[i + 8]->Draw();
 
-		TLegend *h_BL_leg = new TLegend(0.55, 0.55, 1.0, 0.9);
+
+		TLine *ln4 = new TLine(mean_BL[i] , h_vec[i + 8]->GetMinimum(), mean_BL[i] ,h_vec[i + 8]->GetMaximum());
+		ln4->SetLineColor(2);
+        ln4->SetLineWidth(3);
+		//ln4->Draw();
+
+		TLegend *h_BL_leg = new TLegend(0.55, 0.65, 1.0, 0.9);
 		h_BL_leg->SetTextSize(0.035);
 		h_BL_leg->AddEntry(h_vec[i + 8], Form("#bf{B_{dyn}(#chi_{red}^{2} #leq #chi_{cut}^{2}) }"), "elpf");
 		//h_BL_leg->AddEntry((TObject*)0,Form("entries = %1.f",h_vec[i+8]->GetEntries()),"");
 		h_BL_leg->AddEntry(fit_BL_vec[i], Form("Gaussian fit:"), "l");
 		h_BL_leg->AddEntry((TObject *)0, Form("B_{const}= %1.3f #pm %1.3f", mean_BL[i], mean_BL_err[i]), "");
-		h_BL_leg->AddEntry((TObject *)0, Form("#sigma_{BL} = %1.3f #pm %1.3f", sigma_BL[i], sigma_BL_err[i]), "");
+	//	h_BL_leg->AddEntry((TObject *)0, Form("#sigma_{BL} = %1.3f #pm %1.3f", sigma_BL[i], sigma_BL_err[i]), "");
 		h_BL_leg->Draw("");
 
 	} // end loop over channels

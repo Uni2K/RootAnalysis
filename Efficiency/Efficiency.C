@@ -455,8 +455,8 @@ int main(int argc, char *argv[])
 		h_leg->AddEntry(limit, Form("#Lambda_{thr}: %1.2f (+%1.2f -%1.2f)", threshold, sumCutErrorP,sumCutErrorM), "l");
 		h_leg->AddEntry(limit, Form("P_{thr}: %1.2f (+%1.2f -%1.2f%s)", sumPercentage, sumPercentageErrorP,sumPercentageErrorM, "%"), "l");
 
-		h_leg->AddEntry((TObject *)0, Form("Err Up :#Delta E_{sys}:%1.4f, #Delta E_{stat}: %1.4f", deviationP, upperStatErr), "");
-		h_leg->AddEntry((TObject *)0, Form("Err Low :#Delta E_{sys}:%1.4f, #Delta E_{stat}: %1.4f", deviationM, lowerStatErr), "");
+		h_leg->AddEntry((TObject *)0, Form("Err Up :#Delta #varepsilon_{sys}:%1.4f, #Delta #varepsilon_{stat}: %1.4f", deviationP, upperStatErr), "");
+		h_leg->AddEntry((TObject *)0, Form("Err Low :#Delta #varepsilon_{sys}:%1.4f, #Delta #varepsilon_{stat}: %1.4f", deviationM, lowerStatErr), "");
 		h_leg->AddEntry((TObject *)0, Form("#bf{Efficiency: %1.4f%s (+%1.4lf,-%1.4lf)}",efficiency,"%", combinedUpperError, combinedLowerError), "");
 
 		h_leg->SetTextFont(42);

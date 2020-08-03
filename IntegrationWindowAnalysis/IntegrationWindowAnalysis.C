@@ -39,8 +39,6 @@
 #include "TVirtualFitter.h"
 #include <TApplication.h> // open root gui
 
-
-
 /**
  *  Tutorial
  *  1.constant Baseline -> read in binary data with dynamic BL -> everything else is arbitrary
@@ -63,7 +61,6 @@
  * 
  * 
  * */
-
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
@@ -113,67 +110,67 @@ float t_min_inRange(TH1F *hWave, float t1, float t2)
 }
 string extractValues(string str)
 {
-  unsigned first = str.find("{");
-  unsigned last = str.find("}");
-  string strNew = str.substr(first + 1, last - first - 1);
-  return strNew;
+	unsigned first = str.find("{");
+	unsigned last = str.find("}");
+	string strNew = str.substr(first + 1, last - first - 1);
+	return strNew;
 }
 float stringToFloat(string text)
 {
-  if(text.length()==0)return 0.0;
-  return stof(text);
+	try
+	{
+		if (text.length() == 0)
+			return 0.0;
+		return stof(text);
+	}
+	catch (const std::exception &e)
+	{
+		return 0.0;
+	}
 }
-pair<vector<float>,vector<float>> readPairs(string line,  double initValue)
+pair<vector<float>, vector<float>> readPairs(string line, double initValue)
 {
-  vector<float> peakSignals;
-  vector<float> allSignals;
+	vector<float> peakSignals;
+	vector<float> allSignals;
 
+	peakSignals.clear();
+	allSignals.clear();
 
+	string s = extractValues(line);
+	string columnDelimiter = ",";
+	string valueDelimiter = "/";
 
-      peakSignals.clear();
-      allSignals.clear();
+	size_t pos = 0;
+	std::string token;
+	string calibValue;
+	while ((pos = s.find(columnDelimiter)) != std::string::npos)
+	{
+		token = s.substr(0, pos); //LIKE: 33/178
 
-      string s = extractValues(line);
-      string columnDelimiter = ",";
-      string valueDelimiter = "/";
+		int posOfDelimiter = token.find("/");
 
-      size_t pos = 0;
-      std::string token;
-      string calibValue;
-      while ((pos = s.find(columnDelimiter)) != std::string::npos)
-      {
-        token = s.substr(0, pos); //LIKE: 33/178
+		string peak = token.substr(0, posOfDelimiter);
+		string all = token.substr(posOfDelimiter + 1, token.length() - 1);
 
-        int posOfDelimiter=token.find("/");
+		peakSignals.push_back(stringToFloat(peak));
+		allSignals.push_back(stringToFloat(all));
 
-        string peak=token.substr(0,posOfDelimiter);
-        string all=token.substr(posOfDelimiter+1, token.length()-1);
+		s.erase(0, pos + columnDelimiter.length());
+	}
+	int posOfDelimiter = s.find("/");
+	string peak = s.substr(0, posOfDelimiter);
+	string all = s.substr(posOfDelimiter + 1, s.length() - 1);
 
-        peakSignals.push_back(stringToFloat(peak));
-        allSignals.push_back(stringToFloat(all));
+	peakSignals.push_back(stringToFloat(peak));
+	allSignals.push_back(stringToFloat(all));
 
-        s.erase(0, pos + columnDelimiter.length());
-      }
-      int posOfDelimiter=s.find("/");
-        string peak=s.substr(0,posOfDelimiter);
-        string all=s.substr(posOfDelimiter+1, s.length()-1);
+	for (std::size_t i = peakSignals.size(); i < 32; i++)
+	{
+		peakSignals.push_back(initValue);
+		allSignals.push_back(initValue);
+	}
 
-
-        peakSignals.push_back(stringToFloat(peak));
-        allSignals.push_back(stringToFloat(all));
-    
-  
-
-  
-
-  for (std::size_t i = peakSignals.size(); i < 32; i++)
-  {
-    peakSignals.push_back(initValue);
-    allSignals.push_back(initValue);
-
-  }
-
-  return pair<vector<float>,vector<float>>(peakSignals,allSignals);
+	return pair<vector<float>, vector<float>>(peakSignals, allSignals);
 }
 
 float min_inRange(TH1F *hWave, float t1, float t2)
@@ -193,9 +190,6 @@ float min_inRange(TH1F *hWave, float t1, float t2)
 	return max;
 }
 
-
-
-
 /**
  *  The goal of this class is to determine the perfect integration window for each run and each channel.
  *  For this the integration interval is calculated by the sum Histograms -> Needs SumHistogram attached to the rootfile -> "Full Runmode"
@@ -203,19 +197,18 @@ float min_inRange(TH1F *hWave, float t1, float t2)
  **/
 
 string outputFolder = "./IntegrationWindowPlots";
-int smoothDefault=1500;
+int smoothDefault = 1500;
 
-int peakLeftThreshold=100;
-int peakRightThreshold= 280;
-bool singlePrinter=true;
-
-float labelTextSize=0.02;
-int lineSize=2;
+int peakLeftThreshold = 100;
+int peakRightThreshold = 280;
+bool singlePrinter = false;
+bool hardMode = true; //There are runs with extremely low light intensity (45,46,47 e.g) without a sharp first APO peak -> get some integration window for them
+float labelTextSize = 0.02;
+int lineSize = 2;
 
 int main(int argc, char *argv[])
 {
-
-
+	bool printPercentage = true;
 	gStyle->SetOptStat(0);
 	gStyle->SetGridStyle(3);
 	gStyle->SetGridWidth(1);
@@ -227,11 +220,11 @@ int main(int argc, char *argv[])
 
 	gErrorIgnoreLevel = kError;
 
-	if(singlePrinter){
-		labelTextSize=0.05;
-		lineSize=4;
+	if (singlePrinter)
+	{
+		labelTextSize = 0.05;
+		lineSize = 4;
 	}
-	
 
 	string runName = (string)argv[1];
 	int runNr = atoi(argv[2]);
@@ -247,7 +240,7 @@ int main(int argc, char *argv[])
 	{
 		fs::create_directory(outDir);
 	}
-
+	cout << "Doing: " << inDir << endl;
 	//Open Root File
 	TFile *file = new TFile(inDir.c_str());
 	if (file->IsZombie())
@@ -272,17 +265,17 @@ int main(int argc, char *argv[])
 
 	int plotGrid = ceil(sqrt(channelNumber));
 
-	if(!singlePrinter){
+	if (!singlePrinter)
+	{
 		sumCanvas->Divide(plotGrid, plotGrid);
-			percentageCanvas->Divide(plotGrid, plotGrid);
-
+		percentageCanvas->Divide(plotGrid, plotGrid);
 	}
-	else{
-		sumCanvas->Divide(1,2);
+	else
+	{
+		sumCanvas->Divide(1, 2);
 		percentageCanvas->Divide(1, 2);
+	}
 
-	} 
-	
 	sumCanvas->SetLeftMargin(0.15);
 	FILE *file_list;
 	string list_filename = outputFolder + "/IntegrationWindows.txt";
@@ -292,35 +285,36 @@ int main(int argc, char *argv[])
 	string list_filenameP = outputFolder + "/PercentageValues.txt";
 	file_listP = fopen(list_filenameP.c_str(), "a");
 
-
-	int integrationLeftOffset=20;
-	if(runName.find("calib")!=string::npos){
-		integrationLeftOffset=10;
+	int integrationLeftOffset = 20;
+	if (runName.find("calib") != string::npos)
+	{
+		integrationLeftOffset = 10;
 	}
-
 
 	fprintf(file_listP, "PV_%s={", string(runName).c_str());
 	fprintf(file_list, "IW_%s={", string(runName).c_str());
-		
+
 	for (int i = 0; i < channelNumber; i++)
 	{
 		//OscillationAnalysis ---------------------------------------------------------
-		cout <<" " << endl;
+		cout << " " << endl;
 
-		if(!singlePrinter){
+		if (!singlePrinter)
+		{
 			sumCanvas->cd(i + 1);
 		}
-		else{
+		else
+		{
 			sumCanvas->cd(1);
-		} 
+		}
 		sumCanvas->SetGrid();
 		//	gPad->SetGridx();
 		//	gPad->SetGridy();
 
 		TH1F *sumHist;
-		TH1F *sumHistCalculation ; //Without smoothing
+		TH1F *sumHistCalculation; //Without smoothing
 
-		TLegend *sumHistLegend = new TLegend(0.60, 0.65, 0.99, 1);
+		TLegend *sumHistLegend = new TLegend(0.60, 0.60, 0.99, 1);
 		sumHistLegend->SetTextFont(62);
 
 		sumHistLegend->SetHeader(Form("SumHistogram Channel: %d", i), "c");
@@ -330,24 +324,22 @@ int main(int argc, char *argv[])
 		file->GetObject(name.c_str(), sumHist);
 		file->GetObject(name.c_str(), sumHistCalculation);
 
-
-
-
-		int smooth=smoothDefault;
+		cout << "Entries: " << sumHist->GetEntries() / 1024.0 << endl;
+		int smooth = smoothDefault;
 		switch (i)
 		{
 		case 3:
-			smooth=3000;
+			//	smooth = 3000;
 			break;
 
 		default:
-		
+			smooth = 0;
 			break;
 		}
-
+		smooth = smoothDefault;
 
 		sumHist->Smooth(smooth);
-	
+
 		sumHist->Draw("hist");
 		sumHist->SetLineColor(1);
 
@@ -359,22 +351,19 @@ int main(int argc, char *argv[])
 		yaxis->SetLabelSize(labelTextSize);
 		xaxis->SetLabelSize(labelTextSize);
 
-		
-
-
 		sumCanvas->Update();
 		float t_amp = t_max_inRange(sumHist, 0.0, 320.0);
 		float minY = gPad->GetUymin();
 		float maxY = gPad->GetUymax();
 
-		sumHist->SetAxisRange(30,290); //IMPORTANT -> EXCLUDE OSZILLATIONS AT END OR PF WONT FIND MANY PEAKS
-		
+		sumHist->SetAxisRange(30, 290); //IMPORTANT -> EXCLUDE OSZILLATIONS AT END OR PF WONT FIND MANY PEAKS
+
 		Int_t npeaks = 10; //number of peaks to fit
-		cout<<"npeaks: "<<npeaks<<endl;
+		cout << "npeaks: " << npeaks << endl;
 
 		TSpectrum *s = new TSpectrum(npeaks, 15); // TSpectrum class finds candidates peaks
 		Int_t nfound = s->Search(sumHist, 0, "goff", 0.0001);
-		sumHist->SetAxisRange(0,320);
+		sumHist->SetAxisRange(0, 320);
 
 		Double_t par[100]; //Array of fitting parameters
 		npeaks = 0;
@@ -402,14 +391,15 @@ int main(int argc, char *argv[])
 			{
 				continue;
 			}
-			if(p>0){
-				if(abs(xp-xpeaks[p-1])<20){
+			if (p > 0)
+			{
+				if (abs(xp - xpeaks[p - 1]) < 20)
+				{
 					//Double fit of a single peak-> Skip
 					continue;
 				}
 			}
 			cout << "PEAKS: " << i << "  " << xp << "  " << yp << endl;
-
 
 			par[3 * npeaks + 2] = yp; //height
 			par[3 * npeaks + 3] = xp; //centroid
@@ -432,9 +422,11 @@ int main(int argc, char *argv[])
 			peak_single[i] = new TF1("peak", "gaus", pos_peak - range, pos_peak + range);
 			peak_single[i]->SetLineStyle(11);
 			peak_single[i]->SetLineColor(kRed);
-			if(singlePrinter)peak_single[i]->SetLineWidth(0);
+			if (singlePrinter)
+				peak_single[i]->SetLineWidth(0);
 			sumHist->Fit("peak", "RQ+");
-		if(!singlePrinter)	peak_single[i]->Draw("same");
+			if (!singlePrinter)
+				peak_single[i]->Draw("same");
 			chi2ndf[i] = peak_single[i]->GetChisquare() / peak_single[i]->GetNDF();
 			meanError[i] = peak_single[i]->GetParError(1);
 			peak_single[i]->GetParameters(&par_single[3 * i]);
@@ -455,7 +447,16 @@ int main(int argc, char *argv[])
 			if (j < npeaks)
 			{
 				float period = par_single[1 + (j)*3] - par_single[1 + (j - 1) * 3];
-				cout << "PERIOD FOR: " << i << " " << j << " PERIODE: " << period << "  " << npeaks << endl;
+				cout << "PERIOD FOR: " << i << " " << j << " PERIODE: " << period << "  " << npeaks << " In1: " << par_single[1 + (j)*3] << "  In2: " << par_single[1 + (j - 1) * 3] << endl;
+
+				if (hardMode)
+				{
+					if (period > 70)
+					{
+						//One peak is missing, so 1 is skipped -> Wrong period
+						period = period / 2.0;
+					}
+				}
 
 				float periodError = sqrt(pow(meanError[j], 2) + pow(meanError[j - 1], 2));
 				periods[j - 1] = period;
@@ -467,13 +468,15 @@ int main(int argc, char *argv[])
 		//Determine order and integration Windows
 		float minSearchLeft = 1000;
 		float minSearchRight = 1000;
-		float meanPeriodCounter=0;
+		float meanPeriodCounter = 0;
 		for (j = 0; j < npeaks; j++)
 		{
-			if(periods[j]<200 && periods[j]>20){ //Prevent bugs
-			meanPeriod = meanPeriod + periods[j];
-			meanPeriodError = meanPeriodError + pow(periodErrors[j], 2) + pow(periodErrors[j - 1], 2);
-			meanPeriodCounter++;
+			if (periods[j] < 200 && periods[j] > 20)
+			{ //Prevent bugs
+
+				meanPeriod = meanPeriod + periods[j];
+				meanPeriodError = meanPeriodError + pow(periodErrors[j], 2) + pow(periodErrors[j - 1], 2);
+				meanPeriodCounter++;
 			}
 			if (means[j] < minSearchLeft)
 			{
@@ -489,7 +492,7 @@ int main(int argc, char *argv[])
 		}
 
 		meanPeriod = meanPeriod / (meanPeriodCounter);
-		cout<<"CHANNEL: "<<i<<" MEAN PERIOD: "<<meanPeriod<<"  Counter: "<<meanPeriodCounter<<endl;
+		cout << "CHANNEL: " << i << " MEAN PERIOD: " << meanPeriod << "  Counter: " << meanPeriodCounter << endl;
 		//meanPeriod=periods[0];
 		for (j = 0; j < npeaks; j++)
 		{
@@ -508,23 +511,55 @@ int main(int argc, char *argv[])
 		float sumPercentage = 0;
 		if (npeaks > 1)
 		{
-			TF1 *putc = new TF1("inversepeak", "pol4", par_single[1 + 3] - 30, par_single[1 + 3]);
+
+			float fitLeft = par_single[1 + 3] - 30;
+			float fitRight = par_single[1 + 3] - 5;
+			float searchLeft = fitLeft;
+			float searchRight = fitRight;
+
+			if (hardMode)
+			{
+				switch (runNr)
+				{
+				case 45:
+					fitRight = 120;
+					searchLeft = 150;
+					searchRight = 170;
+					break;
+				case 46:
+					fitRight = 180;
+					searchLeft = 160;
+					searchRight = 170;
+					break;
+				case 47:
+					fitRight = 180;
+					searchLeft = 160;
+					searchRight = 170;
+					break;
+				default:
+					break;
+				}
+			}
+
+			TF1 *putc = new TF1("inversepeak", "pol4", fitLeft, fitRight);
 			putc->SetLineColor(8);
 			putc->SetLineStyle(11);
 			putc->SetParameter(0, 10);
 			putc->SetParameter(1, 155);
 			putc->SetParameter(2, 5);
 			sumHist->Fit("inversepeak", "RQ+");
-			if(!singlePrinter) putc->Draw("same");
+			if (!singlePrinter)
+				putc->Draw("same");
 
-			float minInRange = sumHist->GetFunction("inversepeak")->GetMinimumX(par_single[1 + 3] - 20, par_single[1 + 3]);
+			float minInRange = sumHist->GetFunction("inversepeak")->GetMinimumX(searchLeft, searchRight);
+			cout << "DEBUG: " << minInRange << "  XX " << fitLeft << "  y " << fitRight << endl;
+
 			float minInRangeError = 320.0 / (sumHist->GetNbinsX());
 			TLine *minLine = new TLine(minInRange, minY, minInRange, maxY);
 			minLine->SetLineColor(3);
 			minLine->SetLineWidth(lineSize);
 
 			float entireSignalRight = 3 * meanPeriod + minInRange;
-
 
 			TLine *entireSignalRightLine = new TLine(entireSignalRight, minY, entireSignalRight, maxY);
 			entireSignalRightLine->SetLineColor(9);
@@ -556,8 +591,8 @@ int main(int argc, char *argv[])
 			sumHistLegend->AddEntry(peak_single[0], Form("Mean Period: %1.2f", meanPeriod), "l");
 			sumHistLegend->AddEntry(baselineUsed, Form("Baseline: %1.2f", BL_shift), "l");
 			sumHistLegend->AddEntry(leftLine, Form("Left %1.2f +- %1.2f", means[0] - integrationLeftOffset, meanError[0]), "l");
-			sumHistLegend->AddEntry(minLine, Form("Signal %1.2f +- %1.2f", minInRange, minInRangeError), "l");
-			sumHistLegend->AddEntry(entireSignalRightLine, Form("All %1.2f +- %1.2f", entireSignalRight, allSignalError), "l");
+			sumHistLegend->AddEntry(minLine, Form("Signal %1.2f +- %1.2f", minInRange - means[0], minInRangeError), "l");
+			sumHistLegend->AddEntry(entireSignalRightLine, Form("All %1.2f +- %1.2f", entireSignalRight - means[0], allSignalError), "l");
 
 			sumHist->SetMarkerSize(0.4);
 			sumHist->SetMarkerStyle(21);
@@ -569,19 +604,16 @@ int main(int argc, char *argv[])
 
 			sumHist->GetXaxis()->SetRangeUser(means[0] - integrationLeftOffset, minInRange);
 
-
-
-
-			sumHist->SetFillColorAlpha(kTeal+2, 0.9);
+			sumHist->SetFillColorAlpha(kTeal + 2, 0.9);
 
 			sumHist->SetFillStyle(1001);
 			sumHist->DrawClone("same hist");
 			sumHistLegend->AddEntry(dummyforMarker, Form("Integral: Peak: %1.1e", integralPeak), "P");
-			sumHistLegend->AddEntry(dummyforMarker, Form("IWindow Size: %1.2f", minInRange -( means[0] - integrationLeftOffset)), "l");
+			sumHistLegend->AddEntry(dummyforMarker, Form("IWindow Size: %1.2f", minInRange - (means[0] - integrationLeftOffset)), "l");
 
 			sumHist->GetXaxis()->SetRangeUser(means[0] - integrationLeftOffset, entireSignalRight);
 
-			sumHist->SetFillColorAlpha(kAzure-8, 0.35);
+			//sumHist->SetFillColorAlpha(kAzure-8, 0.35);
 			sumHist->SetMarkerColorAlpha(44, 0.35);
 
 			sumHist->SetFillStyle(3342);
@@ -604,20 +636,20 @@ int main(int argc, char *argv[])
 			sumHist->SetFillStyle(3001);
 			minLine->Draw();
 			leftLine->Draw();
-			if(!singlePrinter)baselineUsed->Draw();
-			if(!singlePrinter)putc->Draw("same");
+			if (!singlePrinter)
+				baselineUsed->Draw();
+			if (!singlePrinter)
+				putc->Draw("same");
 
 			fprintf(file_list, "%f/%f,", minInRange - means[0], entireSignalRight - means[0]);
-
 		}
 		else
 		{
 			fprintf(file_list, "%f/%f,", 0.0, 0.0);
 		}
 
-	if(!singlePrinter)	sumHistLegend->Draw();
-
-
+		//if(!singlePrinter)
+		sumHistLegend->Draw();
 
 		/***
  *      _    _                     _        _       _         
@@ -631,15 +663,17 @@ int main(int argc, char *argv[])
  */
 
 		printf("Uncertainty: %s, Channel: %d\n", runName.c_str(), i);
-		if(!singlePrinter){
-		percentageCanvas->cd(i + 1);
-		}else{
-		percentageCanvas->cd(1);
+		if (!singlePrinter)
+		{
+			percentageCanvas->cd(i + 1);
 		}
-		
+		else
+		{
+			percentageCanvas->cd(1);
+		}
 
-		int xmin = -2;
-		int xmax = 2.2;
+		float xmin = -5.0; //EXTREMELY IMPORTANT -> include all values in the histogram, otherwise the CF is biased
+		float xmax = +5;
 		int nBins = 200;
 		gPad->SetGridx();
 		gPad->SetGridy();
@@ -652,23 +686,28 @@ int main(int argc, char *argv[])
 
 		TString cut("");
 		tree->Draw(Form("IntegralDifference[%d]>>h", i), cut);
-
+		float entries = h->GetMean();
+		if (entries == 1.000f)
+			printPercentage = false;
 		percentageCanvas->Update();
 		minY = gPad->GetUymin();
 		maxY = gPad->GetUymax();
 		TLegend *h_leg = new TLegend(0.15, 0.70, 0.51, 0.9);
 		h_leg->SetTextFont(62);
-		if(!singlePrinter)h_leg->SetHeader(Form("Percentages Channel: %d", i), "c");
+		if (!singlePrinter)
+			h_leg->SetHeader(Form("Percentages Channel: %d", i), "c");
 		h_leg->SetTextSize(labelTextSize);
-		if(!singlePrinter)h_leg->AddEntry(h, Form("%s", runName.c_str()), "l");
+		if (!singlePrinter)
+			h_leg->AddEntry(h, Form("%s", runName.c_str()), "l");
 		h_leg->SetTextFont(42);
+		//h_leg->AddEntry(h, Form("entries: %1.0lf  std: %1.2f", h->GetEffectiveEntries(), h->GetStdDev()), "l");
 
 		TAxis *yaxisP = h->GetYaxis();
 		TAxis *xaxisP = h->GetXaxis();
 		yaxisP->SetLabelSize(labelTextSize);
 		yaxisP->SetTitle("Counts");
 		xaxisP->SetLabelSize(labelTextSize);
-		
+
 		xaxisP->SetTitle(Form("f_{W}"));
 		xaxisP->SetTitleSize(labelTextSize);
 		yaxisP->SetTitleSize(labelTextSize);
@@ -687,40 +726,43 @@ int main(int argc, char *argv[])
 		sumPLine->SetLineWidth(lineSize);
 		sumPLine->Draw();
 
-		double pError = abs(meanP - sumPercentage);
+		double pError = sqrt(pow(abs(meanP - sumPercentage), 2) + pow(meanErrorP, 2));
 
 		TLine *meanLineError = new TLine(sumPercentage, minY, sumPercentage, maxY);
 		meanLineError->SetLineWidth(pError * 1125);
 		meanLineError->SetLineColorAlpha(4, 0.14);
-	//	meanLineError->Draw();
+		//	meanLineError->Draw();
 
 		//double mean=gauss->GetParameter(1);
-		h_leg->AddEntry(meanLine, Form("MeanC: %1.4lf +- %1.4lf", meanP, meanErrorP), "l");
-		h_leg->AddEntry(sumPLine, Form("MeanS: %1.4lf", sumPercentage), "l");
+		h_leg->AddEntry(meanLine, Form("Mean Dist: %1.3lf +- %1.3lf", meanP, meanErrorP), "l");
+		h_leg->AddEntry(sumPLine, Form("Mean CSW: %1.3lf", sumPercentage), "l");
 
 		TLine *dummyP = new TLine(0, 0, 0, 0);
 		dummyP->SetLineColorAlpha(4, 0.14);
-		h_leg->AddEntry(dummyP, Form("MeanD: %1.4lf", pError), "l");
+		h_leg->AddEntry(dummyP, Form("Err D.  : %1.3lf  ", pError), "l");
 
 		h_leg->Draw();
 
-		fprintf(file_listP, "%f/%f,", sumPercentage,pError);
-	
-		if(singlePrinter){
-		sumCanvas->Print((outDir + runName + "_"+to_string(i)+"_IntegrationWindow.pdf").c_str());
-		percentageCanvas->Print((outDir + runName +"_"+to_string(i)+ "_PercentageDistribution.pdf").c_str());
+		if (printPercentage)
+			fprintf(file_listP, "%f/%f,", meanP, pError);
 
+		if (singlePrinter)
+		{
+			sumCanvas->Print((outDir + runName + "_" + to_string(i) + "_IntegrationWindow.pdf").c_str());
+			if (printPercentage)
+				percentageCanvas->Print((outDir + runName + "_" + to_string(i) + "_PercentageDistribution.pdf").c_str());
 		}
-
 	}
 
 	fprintf(file_list, "}\n");
 	fclose(file_list);
-	fprintf(file_listP, "}\n");
+	if (printPercentage)
+		fprintf(file_listP, "}\n");
 	fclose(file_listP);
 
 	sumCanvas->Print((outDir + runName + "_IntegrationWindow.pdf").c_str());
-	percentageCanvas->Print((outDir + runName + "_PercentageDistribution.pdf").c_str());
+	if (printPercentage)
+		percentageCanvas->Print((outDir + runName + "_PercentageDistribution.pdf").c_str());
 
 	/***
  *       _____                         _   _              __           _             
@@ -739,52 +781,77 @@ int main(int argc, char *argv[])
 	string lineWithDataCalib;
 	string lineWithDataMeasurement;
 
-	for (string line; getline(data_store,line);)
+	for (string line; getline(data_store, line);)
 	{
-		if (line.find(runNameOfCalibration) != string::npos){
-			lineWithDataCalib=line; //Use the last line on the txt matching the condition
+		if (line.find(runNameOfCalibration) != string::npos)
+		{
+			lineWithDataCalib = line; //Use the last line on the txt matching the condition
 		}
-		if (line.find(runName) != string::npos){
-			lineWithDataMeasurement=line; //Use the last line on the txt matching the condition
+		if (line.find(runName) != string::npos)
+		{
+			lineWithDataMeasurement = line; //Use the last line on the txt matching the condition
 		}
-			
 	}
-	cout<<"Using Calibration for CF: "<<lineWithDataCalib<<endl;
-	cout<<"Using Measurement for CF: "<<lineWithDataMeasurement<<endl;
-	
-	
-	cout<<"Parsing and Calculating..."<<endl;
+	cout << "Using Calibration for CF: " << lineWithDataCalib << endl;
+	cout << "Using Measurement for CF: " << lineWithDataMeasurement << endl;
 
+	cout << "Parsing and Calculating..." << endl;
 
-	pair<vector<float>,vector<float>> calibCombined=readPairs(lineWithDataCalib,0.0);
-	pair<vector<float>,vector<float>> measurementCombined=readPairs(lineWithDataMeasurement,0.0);
+	pair<vector<float>, vector<float>> calibCombined = readPairs(lineWithDataCalib, 0.0);
+	pair<vector<float>, vector<float>> measurementCombined = readPairs(lineWithDataMeasurement, 0.0);
 
-	vector<float> calibPValues=calibCombined.first;
-	vector<float> calibPValuesError=calibCombined.second;
-	vector<float> measurementPValues=measurementCombined.first;
-	vector<float> measurementPValuesError=measurementCombined.second;
+	vector<float> calibPValues = calibCombined.first;
+	vector<float> calibPValuesError = calibCombined.second;
+	vector<float> measurementPValues = measurementCombined.first;
+	vector<float> measurementPValuesError = measurementCombined.second;
 
 	FILE *file_listCF;
+	FILE *file_listCFF;
+
+	FILE *file_listfW;
+
 	string list_filenameCF = outputFolder + "/CorrectionValues.txt";
+	string list_filenameFW = outputFolder + "/FWValues.txt";
+	string list_filenameCFF = outputFolder + "/CorrectionValuesFormated.txt";
+
+	file_listCFF = fopen(list_filenameCFF.c_str(), "a");
 	file_listCF = fopen(list_filenameCF.c_str(), "a");
+	file_listfW = fopen(list_filenameFW.c_str(), "a");
 
+	if (printPercentage)
+		fprintf(file_listCF, "CF_%s={", string(runName).c_str());
+	fprintf(file_listfW, "%d,", runNr);
+	if (printPercentage)
+		fprintf(file_listCFF, "%d,", runNr);
 
-	fprintf(file_listCF, "CF_%s={", string(runName).c_str());
 	for (int i = 0; i < channelNumber; i++)
 	{
-		float calibPVal=calibPValues[i];
-		float calibPValError=calibPValuesError[i];
-		float measurementPVal=measurementPValues[i];
-		float measurementPValError=measurementPValuesError[i];
+		float calibPVal = calibPValues[i];
+		float calibPValError = calibPValuesError[i];
+		float measurementPVal = measurementPValues[i];
+		float measurementPValError = measurementPValuesError[i];
 
-		float correctionFactor=calibPVal/measurementPVal;
-		float correctionFactorError=sqrt(pow((calibPValError/measurementPVal),2)+pow(measurementPValError*calibPVal/(pow(measurementPVal,2)),2));
-		
-		cout<<"Correction Factor: Channel: "<<i<<" :: "<<correctionFactor<<" +- "<<correctionFactorError<<endl;
-		fprintf(file_listCF, "%f/%f,", correctionFactor,correctionFactorError);
+		float correctionFactor = calibPVal / measurementPVal;
+		float correctionFactorError = sqrt(pow((calibPValError / measurementPVal), 2) + pow(measurementPValError * calibPVal / (pow(measurementPVal, 2)), 2));
 
+		cout << "Correction Factor: Channel: " << i << " :: " << correctionFactor << " +- " << correctionFactorError << endl;
+		if (printPercentage)
+			fprintf(file_listCF, "%f/%f,", correctionFactor, correctionFactorError);
+		if (printPercentage)
+			fprintf(file_listCFF, "%f/%f,", correctionFactor, correctionFactorError);
+		fprintf(file_listfW, "%f/%f,", measurementPVal, measurementPValError);
 	}
-	fprintf(file_listCF, "}\n");
-	fclose(file_listCF);
+	if (printPercentage)
+		fprintf(file_listCF, "}\n");
+	if (printPercentage)
+		fprintf(file_listCFF, "}\n");
+	fprintf(file_listfW, "\n");
+
+	if (printPercentage)
+		fclose(file_listCFF);
+	if (printPercentage)
+		fclose(file_listCF);
+	fclose(file_listfW);
+
 	return 0;
 }

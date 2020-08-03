@@ -41,7 +41,7 @@ for file in "../rootfiles/"/*; do
 	runName=${runName%$suffix} #Remove suffix
 	
 	runNr=`echo "$runName" | sed -r 's/^([^.]+).*$/\1/; s/^[^0-9]*([0-9]+).*$/\1/'`
-	xLimit=1.6
+	xLimit=1.3
 
 	
 	string="$runName $runNr  $xLimit $rootFilePath"

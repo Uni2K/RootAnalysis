@@ -192,137 +192,110 @@ int main(int argc, char **argv)
     switch (channel)
     {
     case 0:
-      //COMMENTED: DYN BL
-
-      /* ranges = {25, 75, 120, 160, 200, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 255;
-      fitLimitStart = 34; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 1.2;
-      range = 6;*/
 
       ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 226;
+      fitLimitStart = 31; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.7;
+      range = 10;
+     
+      //GOOD RESULTS
+
+     /* minus
+     
+      ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 226;
+      fitLimitStart = 30; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 3.302;
+      range = 10;
+
+
+    plus
+      ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 226;
+      fitLimitStart = 32; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.200; //2.2, 3.5
+      range = 10;
+*/
+
+
+
+
+
+      break;
+    case 1:
+
+      ranges = {25, 70, 110, 155, 195, 250, 300};
       n_peaks = 5;
       fitLimitEnd = 225;
       fitLimitStart = 33; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 2.405;
+      nBins = (xmax - xmin) * 3.3;
       range = 10;
-
-      //GOOD RESULTS
-
-      break;
-    case 1:
-      /*   ranges = {25, 70, 110, 155, 195, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 225;
-      fitLimitStart = 39; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 2.2;
-      range = 10;*/
-
-      ranges = {25, 70, 110, 155, 195, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 225;
-      fitLimitStart = 38; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 2.29;
-      range = 10;
-
       break;
     case 2:
-      /*   ranges = {25, 70, 110, 155, 195, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 225;
-      fitLimitStart = 39; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 2.3;
-      range = 10;*/
 
       ranges = {25, 70, 110, 155, 195, 250, 300};
       n_peaks = 5;
-      fitLimitEnd = 230;
-      fitLimitStart = 30; //40
+      fitLimitEnd = 251;
+      fitLimitStart = 26; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 2.2999;
+      nBins = (xmax - xmin) * 3.0;
       range = 10;
+
       break;
 
     case 3:
-      /*  ranges = {25, 75, 120, 160, 200, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 261;
-      fitLimitStart = 40; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 2.2043;
-      range = 6;*/
 
       ranges = {25, 75, 120, 160, 200, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 234;
-      fitLimitStart = 35; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 2.20;
-      range = 6;
-      ;
-      break;
-    case 4:
-      /* ranges = {25, 75, 120, 160, 200, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 261;
-      fitLimitStart = 39; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 2.2;
-      range = 6;*/
-
-      ranges = {25, 75, 120, 160, 200, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 228;
-      fitLimitStart = 35; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 3.65;
-      range = 6;
-      break;
-    case 5:
-      /*    ranges = {25, 70, 110, 155, 195, 250, 300};
-      n_peaks = 5;
-      fitLimitEnd = 257;
-      fitLimitStart = 40; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) *2;
-      range = 10;*/
-
-      ranges = {25, 70, 110, 155, 195, 250, 300};
       n_peaks = 5;
       fitLimitEnd = 240;
-      fitLimitStart = 37; //40
+      fitLimitStart = 35; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 3.15;
+      nBins = (xmax - xmin) *5.4;
       range = 10;
+      
+
+      break;
+    case 4:
+  
+
+      ranges = {25, 75, 120, 160, 200, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 223;
+      fitLimitStart = 33; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 2.6;
+      range = 6;
+   
+      break;
+    case 5:
+    
+      ranges = {25, 70, 110, 155, 195, 250, 300};
+      n_peaks = 5;
+      fitLimitEnd = 247;
+      fitLimitStart = 40; //40
+      xmin = -50;
+      xmax = 400;
+      nBins = (xmax - xmin) * 3.2;
+      range = 10;
+   
       break;
     case 6:
-      /*  ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
-      n_peaks = 5;
-      fitLimitEnd = 251;
-      fitLimitStart = 41; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 1.201;
-      range = 10;*/
-
+     
       ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
       n_peaks = 5;
       fitLimitEnd = 253;
@@ -331,24 +304,18 @@ int main(int argc, char **argv)
       xmax = 400;
       nBins = (xmax - xmin) * 3.49;
       range = 10;
+  
       break;
     case 7:
-      /*  ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
-      n_peaks = 5;
-      fitLimitEnd = 251;
-      fitLimitStart = 41; //40
-      xmin = -50;
-      xmax = 400;
-      nBins = (xmax - xmin) * 1.201;
-      range = 10;*/
+
 
       ranges = {-20, 20, 70, 120, 160, 200, 240, 280};
       n_peaks = 5;
-      fitLimitEnd = 250;
-      fitLimitStart = 39; //40
+      fitLimitEnd = 254;
+      fitLimitStart = 36; //40
       xmin = -50;
       xmax = 400;
-      nBins = (xmax - xmin) * 3.3;
+      nBins = (xmax - xmin) *3.7;
       range = 10;
 
       break;
@@ -379,8 +346,8 @@ int main(int argc, char **argv)
     h->SetMarkerColorAlpha(kBlack, 0.6);
     h->SetMarkerSize(0);
     TString cut("");
+    //tree->Draw(Form("IntegralErrorP[%d]>>h", channel), cut);
     tree->Draw(Form("Integral[%d]>>h", channel), cut);
-    //tree->Draw(Form("Integral[%d]>>h", channel), cut);
     //tree->Draw(Form("Integral[%d]>>h", channel), cut);
 
     h->Smooth(0);
@@ -441,7 +408,7 @@ int main(int argc, char **argv)
     *****/
 
     TF1 *f = new TF1("fitf", fitf, fitLimitStart, fitLimitEnd, 7);
-    h->GetYaxis()->SetTitle("Counts");
+    h->GetYaxis()->SetTitle("counts");
     h->GetXaxis()->SetTitle("mV #times ns");
     if (light)
     {
@@ -541,7 +508,7 @@ int main(int argc, char **argv)
     if (!light)
       h2->Fit("alt", "RQM");
 
-    h2->GetYaxis()->SetTitle("Counts");
+    h2->GetYaxis()->SetTitle("counts");
     h2->GetXaxis()->SetTitle("mV #times ns");
     if (light)
     {
@@ -593,7 +560,7 @@ int main(int argc, char **argv)
 
     // custom legend
     TLegend *h_leg = new TLegend(0.65, 0.60, 0.99, 0.9);
-    h_leg->SetTextSize(0.04);
+    h_leg->SetTextSize(0.03);
     h_leg->AddEntry(h2, Form("#bf{pulse-charge spectrum}"), "lpef");
     if (!light)
       h_leg->AddEntry((TObject *)0, Form("entries: %1.0f", h2->GetEntries()), "");
@@ -613,7 +580,7 @@ int main(int argc, char **argv)
     if (!light)
       h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.5f #pm %1.5f", sig1, sig1_err), "");
     h_leg->AddEntry((TObject *)0, Form("K = %1.3f #pm %1.3f", calib_factor, calib_factor_err), "");
-    //h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
+    h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
     if (!light)
     {
       h_leg->AddEntry(alt, Form("multi-Gaussian fit"), "l");
@@ -739,7 +706,7 @@ int main(int argc, char **argv)
 
     // print legend
     TLegend *leg = new TLegend(0.33, 0.56, 0.9, 0.9);
-    leg->SetTextSize(0.04);
+    leg->SetTextSize(0.03);
     leg->AddEntry("gr_alt", "peak-to-peak distance #Delta_{ptp,k} of k^{th} peak", "ep");
     leg->AddEntry("gr_comb2", Form("gain G_{fit,charge} = %1.2f mV #times ns", calib_factor), "l");
     leg->AddEntry((TObject *)0, Form("1#sigma-uncertainty bands:"), "");

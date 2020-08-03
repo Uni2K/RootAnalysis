@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.use('agg')
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
 import matplotlib.pyplot as plt
 import uproot
 import shutil
@@ -100,6 +103,7 @@ run_list = [k for k in run_list if 'dc' in k]
 
 # create N_pe threshold array
 npe_max = 30
+
 npe_granularity=0.1
 npe_number=math.ceil(npe_max/npe_granularity)
 channelXMax=15
@@ -107,10 +111,11 @@ sumXMax=30
 channelXMin=-1.5
 sumXMin=-5.5
 
-#threshold=0.05 #Percentage
-threshold=0.5 #0.5NPE
+threshold=0.05 #Percentage
+#threshold=0.5 #0.5NPE 1 NPE ->
+tresholdMode=0 #0 -> Find NPE, 1 -> Find Percentage 
 
-tresholdMode=1 #0 -> Find NPE, 1 -> Find Percentage 
+
 
 pe_val = np.zeros(npe_number+1)
 for i in range(npe_number+1):
@@ -252,7 +257,7 @@ for branch in range(0,3):
 			print("Printing: {:s}".format(runNameWithoutExtension))
 			#_____ SINGLE PLOTS ____
 			# loop over datasets, 8 channels + 1 sum
-			fig_title = "dark count pulse-height spectrum"
+			fig_title = "dark count pulse-charge spectrum"
 			file.write("{:s}={{".format(runNameWithoutExtension)) 	
 
 			for k in range(0,9):
@@ -290,12 +295,12 @@ for branch in range(0,3):
 
 				## dc pulse-heigt, corrected binning
 				binsPerNpe=int(1/npe_granularity)
-				ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="step",color=ch_hist_color,alpha=0.8, log=logEnabled,label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]),zorder=2,density=False)
+				nBins = int(((df_data[data_id].max() - df_data[data_id].min()) *10).round(0))
 
+				ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="stepfilled",color=ch_hist_color,alpha=0.8, log=logEnabled,zorder=2,density=False)
 
-				
 				if tresholdMode:
-					matchingEntry=df_cprob[df_cprob.iloc[:,1] <= threshold]
+					matchingEntry=df_cprob[df_cprob.iloc[:,0] >= threshold]
 				else:
 					matchingEntry=df_cprob[df_cprob.iloc[:, (k+i*9)+1] <= threshold]
 
@@ -311,12 +316,18 @@ for branch in range(0,3):
 
 				#display(probMatchingPercent)
 				#display(rowOfMatching)
-				ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=2,marker="o",label=( r"$P_{{DC}}(\Lambda)$"+"\n"+r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)+ "\n" +"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching)),zorder=2)
+				ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=2,marker="o",zorder=2)
+				
+				
+				legend_elements = [Line2D([0], [0], color='black', marker='o' , label=r"$P_{{DC}}(\Lambda)$"), Line2D([0], [0], color='black', lw=0, label=r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)),Line2D([0], [0], color='black', lw=0, label=r"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching))
+				,Patch(facecolor=ch_hist_color, label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]))]
 
+				ax.legend(handles=legend_elements, loc="best",fontsize=10)
+
+				
 				# ax.set_title(single_fig_title,fontsize=10)
-				ax.set_xlabel("$\Lambda[N_{{pe}}]$",fontsize=10)
+				ax.set_xlabel(r"$\Lambda$"+r"$[N_{{pe}}]$",fontsize=10)
 				ax.set_ylabel("$P_{DC}$",fontsize=10)
-				ax.legend(loc="best",fontsize=10)
 				ax.set_xticks(x_ticks)
 				ax.set_xlim(x_min,x_max)
 				# ax.tick_params(axis='y', labelcolor=ch_hist_color,labelsize=y_labelsize)
@@ -371,20 +382,37 @@ for branch in range(0,3):
 				continue
 
 			## dc pulse-heigt, 1 bin per photoelctron
-			ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="step",color=ch_hist_color,alpha=0.8, log=logEnabled,label="1 bin per photoelectron\nmean: $N_{{pe}}$ = {:1.2f}\n ".format(df_mean.iloc[(k+i*9),0]),zorder=2,density=False)
+			#ax.hist(df_data[data_id].dropna().values, weights=weights, bins=xbins, histtype="step",color=ch_hist_color,alpha=0.8, log=logEnabled,label="1 bin per photoelectron\nmean: $N_{{pe}}$ = {:1.2f}\n ".format(df_mean.iloc[(k+i*9),0]),zorder=2,density=False)
 
 			## dc pulse-heigt, 10 bin per photoelctron
 			nBins = int(((df_data[data_id].max() - df_data[data_id].min()) *10).round(0))
-			ax.hist(df_data[data_id].dropna().values, weights=weights, bins=nBins, histtype="stepfilled",color=sum_hist_color,alpha=0.8, log=logEnabled,label="10 bin per photoelectron\nmean: $N_{{pe}}$ = {:1.2f}\n".format(df_mean.iloc[(k+i*9),0]),zorder=1,density=False)
-			probMatchingPercent=df_cprob[df_cprob.iloc[:, (k+i*9)+1] <= threshold]
+			ax.hist(df_data[data_id].dropna().values, weights=weights, bins=nBins, histtype="stepfilled",color=sum_hist_color,alpha=0.8, log=logEnabled,label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]),zorder=1,density=False)
+		
+	
+		
+			if tresholdMode:
+				probMatchingPercent=df_cprob[df_cprob.iloc[:,0] >= threshold]
+			else:
+				probMatchingPercent=df_cprob[df_cprob.iloc[:, (k+i*9)+1] <= threshold]
+
 			rowOfMatching=probMatchingPercent.iloc[0,0]
 			percentageOfMatching=probMatchingPercent.iloc[0,(k+i*9)+1]
-			ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=1,marker="o",label=("cumm.: "r"$N_{{pe}}(P\leq {:1.2f}\%) \geq $ {:1.2f}".format(percentageOfMatching*100,rowOfMatching)),zorder=2)
+
+
+
+		
+			ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=1,marker="o",label=( r"$P_{{DC}}(\Lambda)$"+"\n"+r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)+ "\n" +"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching)),zorder=2)
 
 			ax.set_title(single_fig_title,fontsize=10)
-			ax.set_xlabel("number-of-photoelectrons [$N_{pe}$]",fontsize = 9)
-			ax.set_ylabel("probability",fontsize = 9)
-			ax.legend(loc="best",fontsize=6.5)
+			ax.set_xlabel(r"$\Lambda$"+r"$[N_{{pe}}]$",fontsize=9)
+			ax.set_ylabel(r"$P_{{DC}}$",fontsize = 9)
+			
+			legend_elements = [Line2D([0], [0], color='black', marker='o' , label=r"$P_{{DC}}(\Lambda)$"), Line2D([0], [0], color='black', lw=0, label=r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)),Line2D([0], [0], color='black', lw=0, label=r"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching))
+			,Patch(facecolor=sum_hist_color, label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]))]
+
+			ax.legend(handles=legend_elements, loc="best",fontsize=6.5)
+
+			
 			ax.set_xticks(x_ticks)
 			ax.set_xlim(x_min,x_max)
 			# ax.tick_params(axis='y', labelcolor=ch_hist_color,labelsize=y_labelsize)

@@ -23,7 +23,6 @@ g++ IntegrationWindowAnalysis.C -lstdc++fs `root-config --libs --cflags` -o Inte
 		fi
 
 	fi
-
 	rootFilePath=$file
 
 	prefix="../rootfiles//"
