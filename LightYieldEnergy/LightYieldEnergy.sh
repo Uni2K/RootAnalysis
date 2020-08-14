@@ -76,6 +76,7 @@ positionsU=($(printf "%s\n" "${positions[@]}" | sort -u | tr '\n' ' '))
 echo "RunNumbers: ${positions[@]}"
 echo "RunNumbersUnique: ${positionsU[@]}"
 
+
 IFS=\, eval 'str14="${paths14[*]}"'
 IFS=\, eval 'str26="${paths26[*]}"'
 IFS=\, eval 'str52="${paths52[*]}"'

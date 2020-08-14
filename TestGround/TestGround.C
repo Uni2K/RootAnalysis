@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 	file->GetObject("T", tree);
 
 		int bins=100;
-		int maxX=10000;
+		int maxX=8000;
 		int min=-10;
 
 		TCanvas *c = new TCanvas("c", "Graph2D example", 0, 0, 1800, 1000);
@@ -175,8 +175,8 @@ int main(int argc, char *argv[])
 
 
 		tree->Draw("Integral[1]>>allHist", "");
-		tree->Draw("IntegralErrorP[2]>>allHistErrorP", "");
-		tree->Draw("IntegralErrorM[2]>>allHistErrorM", "");
+		tree->Draw("IntegralErrorP[1]>>allHistErrorP", "");
+		tree->Draw("IntegralErrorM[1]>>allHistErrorM", "");
 
 
 		

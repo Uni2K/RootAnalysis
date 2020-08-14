@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	bool zoomMode=false;
 	int numberToScaleUp=10010;
 	float dcBinSize = 0.1;
-	int maxX = 900;
+	int maxX = 4500;
 	int min = -100;
 	int numberOfNPE=maxX-min;
 	int bins = numberOfNPE*(1.0/dcBinSize); //0.1 Photoelectron
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 	ifstream data_storeErrorP(thresholdsFileErrorP);
 	ifstream data_storeErrorM(thresholdsFileErrorM);
 
-	TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 500);
+	TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 650);
 	effCanvas->SetGrid();
 
 	bool foundThreshold=false;
@@ -412,7 +412,11 @@ int main(int argc, char *argv[])
 		double upperStatErr = abs(efficiency - TEfficiency().ClopperPearson(entry, entryC, 0.682689492137, true) * 100);
 		double lowerStatErr = abs(efficiency - TEfficiency().ClopperPearson(entry, entryC, 0.682689492137, false) * 100);
 
-		float combinedUpperError = sqrt(pow(upperStatErr, 2) + pow(deviationP, 2));
+		float combinedUpperError =sqrt(pow(upperStatErr, 2) + pow(deviationP, 2));
+		
+		 //std::min(sqrt(pow(upperStatErr, 2) + pow(deviationP, 2)),(double)(100-efficiency)); //max 100%, not needed
+
+
 		float combinedLowerError = sqrt(pow(lowerStatErr, 2) + pow(deviationM, 2));
 		cout << "Run: " << runName << "  Unscaled All: " << entry_temp << "  Cut: " << entryC_temp << endl;
 		cout << "Run: " << runName << "  EffErrP: " << efficiencyP << "  Unscaled All: " << entryP_temp << "  Cut: " << entryCP_temp << endl;
@@ -448,7 +452,7 @@ int main(int argc, char *argv[])
 
 		int binOfThreshold = allHist->FindBin(threshold);
 
-		TLegend *h_leg = new TLegend(0.50, 0.62, 0.90, 0.90);
+		TLegend *h_leg = new TLegend(0.47, 0.62, 0.90, 0.90);
 		h_leg->SetTextSize(0.03);
 		h_leg->AddEntry(allHist, Form("Entries: %1.1f, Cutted: %1.1f ", entry,entryC), "f");
 		//h_leg->AddEntry(limit, Form("Threshold from: %s", thresholdName.c_str()), "l");
@@ -461,8 +465,8 @@ int main(int argc, char *argv[])
 
 		h_leg->SetTextFont(42);
 
-		if(!zoomMode)h_leg->Draw();
-		limit->Draw();
+		//if(!zoomMode)h_leg->Draw();
+		//limit->Draw();
 
 		//TCanvas *statCanvas = new TCanvas("statCanvas", "Stat Histogram", 1000, 1000);
 		//statCanvas->SetGrid();

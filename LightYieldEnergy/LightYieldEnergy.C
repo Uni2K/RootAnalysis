@@ -81,6 +81,9 @@ vector<string> split(const string &str, const string &delim)
 	return tokens;
 }
 
+float lightyield1=0;
+float lightyield2=0;
+float lightyield3=0;
 int main(int argc, char *argv[])
 {
 	gStyle->SetOptStat(0);
@@ -98,18 +101,23 @@ int main(int argc, char *argv[])
 	vector<string> runNames26 = split((string)argv[2], ",");
 	vector<string> runNames52 = split((string)argv[3], ",");
 	vector<string> positions = split((string)argv[4], ",");
-	
 
 	TCanvas *masterCanvas = new TCanvas("all", "Sum Histogram", 2000, 3000);
-	masterCanvas->Divide(2,3);
-	
-	string outDirAll =outputFolder + "/";
+	masterCanvas->Divide(3, 4);
+	masterCanvas->SetTopMargin(0.);
+	masterCanvas->SetBottomMargin(0.);
+	masterCanvas->SetLeftMargin(0.);
+	masterCanvas->SetRightMargin(0.);
+
+	string outDirAll = outputFolder + "/";
 
 	for (size_t i = 0; i < positions.size(); i++)
 	{
-		masterCanvas->cd(i+1);
+		masterCanvas->cd(i + 1);
 
 		int position = stoi(positions[i]);
+		int angle = 0;
+
 		vector<string> runList;
 		//Find energies for positions
 		cout << "Position: " << positions[i] << endl;
@@ -117,39 +125,37 @@ int main(int argc, char *argv[])
 		string printName = "Position_" + positions[i];
 
 		string outDir = Form((outputFolder + "/%s/").c_str(), printName.c_str());
-		if (!fs::is_directory(outputFolder) || !fs::exists(outputFolder))
+	/*	if (!fs::is_directory(outputFolder) || !fs::exists(outputFolder))
 		{
 			fs::create_directory(outputFolder);
 		}
 		if (!fs::is_directory(outDir) || !fs::exists(outDir))
 		{
 			fs::create_directory(outDir);
-		}
+		}*/
 
 		for (std::vector<string>::size_type j = 0; j != runNames14.size(); j++)
 		{
 
 			string runtemp = runNames14[j];
-			string ser = string("pos" + positions[i]);
+			string ser = string("pos" + positions[i]+"_");
 
 			if (runtemp.find(ser) != std::string::npos)
 			{
 				runList.push_back(runtemp);
-								break;
-
+				break;
 			}
 		}
 		for (std::vector<string>::size_type j = 0; j != runNames26.size(); j++)
 		{
 
 			string runtemp = runNames26[j];
-			string ser = string("pos" + positions[i]);
+			string ser = string("pos" + positions[i]+"_");
 
 			if (runtemp.find(ser) != std::string::npos)
 			{
 				runList.push_back(runtemp);
-								break;
-
+				break;
 			}
 		}
 
@@ -157,7 +163,7 @@ int main(int argc, char *argv[])
 		{
 
 			string runtemp = runNames52[j];
-			string ser = string("pos" + positions[i]);
+			string ser = string("pos" + positions[i]+"_");
 
 			if (runtemp.find(ser) != std::string::npos)
 			{
@@ -173,17 +179,13 @@ int main(int argc, char *argv[])
 		TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 500);
 		effCanvas->SetGrid();
 		effCanvas->cd();
-		THStack *hs = new THStack("hs","");
+		THStack *hs = new THStack("hs", "");
 
+		TLegend *h_leg = new TLegend(0.44, 0.72, 1, 1);
+		h_leg->SetTextSize(0.04);
+
+		int colorCounter = 1;
 		
-
-
-
-		TLegend *h_leg = new TLegend(0.50, 0.62, 0.90, 0.90);
-		h_leg->SetTextSize(0.025);
-
-		int colorCounter=1;
-		int angle=0;
 		for (std::vector<string>::size_type j = 0; j != runList.size(); j++)
 		{
 
@@ -208,7 +210,7 @@ int main(int argc, char *argv[])
 			int entryNumber = 16;
 			float energy = 0;
 			int position = 0;
-			 angle = 0;
+			angle = 0;
 
 			file->GetObject("T", tree);
 			tree->SetBranchAddress("nCh", &channelNumber);
@@ -218,17 +220,14 @@ int main(int argc, char *argv[])
 
 			tree->GetEntry(1); //sollte alles konstant sein, also kann man irgendeinen Entry nehmen.
 
-			energy=energy*0.1f;
+			energy = energy * 0.1f;
 			cout << "Doing: " << runName << "  Energy: " << energy << "  Pos: " << position << endl;
 
-			int maxX =- 900;
+			int maxX = -900;
 			int min = -100;
 			int bins = 450;
 
 			TH1D *allHist = new TH1D("allHist", "", bins, min, maxX);
-
-
-
 
 			allHist->SetFillColorAlpha(colorCounter, 0.4);
 			allHist->SetLineColorAlpha(1, 0);
@@ -236,35 +235,56 @@ int main(int argc, char *argv[])
 			//Fill
 			tree->Draw("chargeChannelSumWOM[3]>>allHist", "");
 
-			
-
-
-			float mean=allHist->GetMean();
+			float mean = allHist->GetMean();
 			//allHist->Draw("hist");
-			h_leg->AddEntry(allHist, Form("%1.1f GeV  Mean: %1.1f N_{pe}", energy,mean), "f");
-	
+			h_leg->AddEntry(allHist, Form("%1.1f GeV  Mean: %1.0f N_{pe}", energy, mean), "f");
 
 			hs->Add(allHist);
+
+
+			switch (colorCounter)
+			{
+			case 1:
+					lightyield1=mean;
+				break;
+			case 2:
+					lightyield2=mean;
+				break;
+				case 3:
+					lightyield3=mean;
+				break;
+		
+			}
 			colorCounter++;
+
+
+
 		}
+
+		FILE *file_listP;
+		string list_filenameP = outputFolder + "/Lightyields.txt";
+		file_listP = fopen(list_filenameP.c_str(), "a");
+
+		fprintf(file_listP, "%d_%d=%1.2f/%1.2lf/%1.2lf \n", position,angle, lightyield1,lightyield2,lightyield3);
+		fclose(file_listP);
+
 		hs->Draw("nostack");
 		TAxis *yaxisP = hs->GetYaxis();
 		TAxis *xaxisP = hs->GetXaxis();
-			yaxisP->SetLabelSize(0.03);
-			yaxisP->SetTitle("counts");
-			yaxisP->SetTitleSize(0.03);
-			xaxisP->SetLabelSize(0.03);
-			xaxisP->SetTitle("N_{pe}");
-			xaxisP->SetTitleSize(0.03);
-	
-		
+		yaxisP->SetLabelSize(0.04);
+		yaxisP->SetTitle("counts");
+		yaxisP->SetTitleSize(0.04);
+		xaxisP->SetLabelSize(0.04);
+		xaxisP->SetTitle("N_{pe}");
+		xaxisP->SetTitleSize(0.04);
+
 		//h_leg->AddEntry(limit, Form("Threshold from: %s", thresholdName.c_str()), "l");
 		//h_leg->AddEntry(limit, Form("#Lambda_{thr}: %1.2f (+%1.2f -%1.2f)", threshold, sumCutErrorP,sumCutErrorM), "l");
 		//h_leg->AddEntry(limit, Form("P_{thr}: %1.2f (+%1.2f -%1.2f%s)", sumPercentage, sumPercentageErrorP,sumPercentageErrorM, "%"), "l")
-		h_leg->AddEntry((TObject *)0, Form("Position: %d, Rotation: %d deg",position,angle),"");
+		h_leg->AddEntry((TObject *)0, Form("Position: %d", position), "");
 
 		h_leg->Draw();
-		masterCanvas->cd(i+1);
+		masterCanvas->cd(i + 1);
 		effCanvas->DrawClonePad();
 	}
 	masterCanvas->Print((outDirAll + "LYE.pdf").c_str());
