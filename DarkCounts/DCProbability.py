@@ -319,14 +319,14 @@ for branch in range(0,3):
 				ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=2,marker="o",zorder=2)
 				
 				
-				legend_elements = [Line2D([0], [0], color='black', marker='o' , label=r"$P_{{DC}}(\Lambda)$"), Line2D([0], [0], color='black', lw=0, label=r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)),Line2D([0], [0], color='black', lw=0, label=r"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching))
+				legend_elements = [Line2D([0], [0], color='black', marker='o' , label=r"$P_{{DC}}(x)$"), Line2D([0], [0], color='black', lw=0, label=r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)),Line2D([0], [0], color='black', lw=0, label=r"$N^{{thr}}_{{pe}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching))
 				,Patch(facecolor=ch_hist_color, label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]))]
 
 				ax.legend(handles=legend_elements, loc="best",fontsize=10)
 
 				
 				# ax.set_title(single_fig_title,fontsize=10)
-				ax.set_xlabel(r"$\Lambda$"+r"$[N_{{pe}}]$",fontsize=10)
+				ax.set_xlabel(r"$N_{{pe}}$",fontsize=10)
 				ax.set_ylabel("$P_{DC}$",fontsize=10)
 				ax.set_xticks(x_ticks)
 				ax.set_xlim(x_min,x_max)
@@ -404,10 +404,10 @@ for branch in range(0,3):
 			ax.plot(pe_val,df_cprob.iloc[:,(k+i*9)+1].values,color=ch_prob_color,linestyle=":",linewidth=1,ms=1,marker="o",label=( r"$P_{{DC}}(\Lambda)$"+"\n"+r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)+ "\n" +"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching)),zorder=2)
 
 			ax.set_title(single_fig_title,fontsize=10)
-			ax.set_xlabel(r"$\Lambda$"+r"$[N_{{pe}}]$",fontsize=9)
+			ax.set_xlabel(r"$N_{{pe}}$",fontsize=9)
 			ax.set_ylabel(r"$P_{{DC}}$",fontsize = 9)
 			
-			legend_elements = [Line2D([0], [0], color='black', marker='o' , label=r"$P_{{DC}}(\Lambda)$"), Line2D([0], [0], color='black', lw=0, label=r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)),Line2D([0], [0], color='black', lw=0, label=r"$\Lambda_{{thr}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching))
+			legend_elements = [Line2D([0], [0], color='black', marker='o' , label=r"$P_{{DC}}(x)$"), Line2D([0], [0], color='black', lw=0, label=r"$P_{{thr}} \leq {:1.2f}\%$".format(percentageOfMatching*100)),Line2D([0], [0], color='black', lw=0, label=r"$N^{{thr}}_{{pe}} \geq {:1.2f}N_{{pe}}$".format(rowOfMatching))
 			,Patch(facecolor=sum_hist_color, label=r"PCS rebinned with {:d} bins per $N_{{pe}}$".format(binsPerNpe,df_mean.iloc[(k+i*9),0]))]
 
 			ax.legend(handles=legend_elements, loc="best",fontsize=6.5)

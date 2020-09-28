@@ -240,24 +240,41 @@ int main(int argc, char *argv[])
 		{
 			int runPos = posRun.first;
 			vector<float> dat = posRun.second;
-			float d=getDistanceFromWOMD(runPos);
+			float d = getDistanceFromWOMD(runPos);
 			x.push_back(d);
 			y.push_back(dat[0]);
 			yErrU.push_back(dat[1]);
 			yErrL.push_back(dat[2]);
-			printf("Doing Position: %d , Eff: %1.4f (%1.4f,%1.4f), Distance: %1.1f\n", runPos, dat[0], dat[1], dat[2],d);
+			printf("Doing Position: %d , Eff: %1.4f (%1.4f,%1.4f), Distance: %1.1f\n", runPos, dat[0], dat[1], dat[2], d);
 		}
 
 		const Int_t n = x.size();
 		TGraphAsymmErrors *gr = new TGraphAsymmErrors(n, &(x[0]), &(y[0]), 0, 0, &(yErrL[0]), &(yErrU[0]));
+
+		if (colorCounter == 1)
+		{
+			gr->SetLineColor(2);
+			gr->SetMarkerStyle(21);
+			gr->SetMarkerColor(2);
+		}
+		else if (colorCounter == 2)
+		{
+			gr->SetLineColor(4);
+			gr->SetMarkerStyle(22);
+			gr->SetMarkerColor(4);
+		}
+		else
+		{
+			gr->SetLineColor(1);
+			gr->SetMarkerStyle(20);
+			gr->SetMarkerColor(1);
+		}
 		gr->SetTitle("Energy");
-		gr->SetLineColor(colorCounter);
 		gr->SetLineWidth(2.5);
-		gr->SetMarkerColor(colorCounter);
-		gr->SetMarkerSize(1.4);
-		gr->SetMarkerStyle(19+colorCounter);
+		gr->SetMarkerSize(1.2);
 		gr->GetXaxis()->SetLabelSize(0.085);
 		gr->GetYaxis()->SetLabelSize(0.085);
+
 		h_leg->AddEntry(gr, Form("Energy: %1.2f GeV", energy / 10.0), "p");
 
 		TF1 *f1 = new TF1("fit", "-[0]*exp(x*[2])+[1]", 160, 2000);
@@ -280,7 +297,7 @@ int main(int argc, char *argv[])
 	yaxisP->SetTitle("efficiency [%]");
 	yaxisP->SetTitleSize(0.04);
 	xaxisP->SetLabelSize(0.04);
-	xaxisP->SetTitle("distance [mm]");
+	xaxisP->SetTitle("d [mm]");
 	xaxisP->SetTitleSize(0.04);
 	h_leg->SetTextFont(42);
 	h_leg->Draw();

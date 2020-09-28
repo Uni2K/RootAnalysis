@@ -579,8 +579,9 @@ int main(int argc, char **argv)
       h_leg->AddEntry((TObject *)0, Form("#sigma_{0} = %1.5f #pm %1.5f", sig0, sig0_err), "");
     if (!light)
       h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.5f #pm %1.5f", sig1, sig1_err), "");
-    h_leg->AddEntry((TObject *)0, Form("K = %1.3f #pm %1.3f", calib_factor, calib_factor_err), "");
     h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
+        h_leg->AddEntry((TObject *)0, Form("#Lambda_{pixel} = %1.3f #pm %1.3f", calib_factor, calib_factor_err), "");
+
     if (!light)
     {
       h_leg->AddEntry(alt, Form("multi-Gaussian fit"), "l");

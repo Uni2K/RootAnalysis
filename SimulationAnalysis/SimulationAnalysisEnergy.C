@@ -94,11 +94,13 @@ void extractIntegerWords(string str)
 int main(int argc, char *argv[])
 {
 
+	TApplication *myapp = new TApplication("myapp", 0, 0);
+
     struct dirent *entry = nullptr;
     DIR *dp = nullptr;
     THStack *hs = new THStack("hs", "");
-    TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 600);
-    TLegend *h_leg = new TLegend(0.55, 0.62, 0.90, 0.90);
+    TCanvas *effCanvas = new TCanvas("effCanvas", "Sum Histogram", 1000, 1000);
+    TLegend *h_leg = new TLegend(0.45, 0.65, 0.90, 0.90);
     h_leg->SetTextSize(0.03);
     std::vector<TH1F *> histos;
     dp = opendir("../rootfiles/");
@@ -145,9 +147,9 @@ int main(int argc, char *argv[])
 
             //effCanvas->SetGrid();
 
-            int n_bins = 150;
+            int n_bins = 50;
             // int n_bins = (int)(Xmax - Xmin)*1;
-            TH1F *hist = new TH1F("allHist", "", 50, 0, -1);
+            TH1F *hist = new TH1F("allHist", "",n_bins, -100, 1200);
 
             hist->GetXaxis()->SetTitle("pulse-height(charge) [mv #times ns]");
             // h_vec[i]->GetXaxis()->SetTitle("number-of-photoelectrons [N_{pe}]");
@@ -156,7 +158,7 @@ int main(int argc, char *argv[])
             hist->SetFillColorAlpha(colorCounter, 0.4);
             hist->SetLineColorAlpha(1, 0);
             hist->SetLineColor(colorCounter);
-            h_leg->AddEntry(hist, Form("%1.1f GeV  Mean: %1.1f MeV", energy, hist->GetMean()), "f");
+            h_leg->AddEntry(hist, Form("%1.1f GeV  mean: %1.1f MeV", energy, hist->GetMean()), "f");
             histos.push_back(hist);
 
             colorCounter++;
@@ -174,17 +176,18 @@ int main(int argc, char *argv[])
     hs->Draw("nostack");
     TAxis *yaxisP = hs->GetYaxis();
     TAxis *xaxisP = hs->GetXaxis();
-    yaxisP->SetLabelSize(0.04);
+    yaxisP->SetLabelSize(0.03);
     yaxisP->SetTitle("counts");
-    yaxisP->SetTitleSize(0.04);
-    xaxisP->SetLabelSize(0.04);
+    yaxisP->SetTitleSize(0.03);
+    xaxisP->SetLabelSize(0.03);
     xaxisP->SetTitle("energy deposition [MeV]");
-    xaxisP->SetTitleSize(0.04);
+    xaxisP->SetTitleSize(0.03);
 
     h_leg->Draw();
 
     effCanvas->SaveAs("out.pdf");
 
     closedir(dp);
+    //	myapp->Run();
     return 0;
 }

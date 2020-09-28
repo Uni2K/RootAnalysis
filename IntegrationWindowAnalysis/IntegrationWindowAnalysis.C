@@ -201,8 +201,8 @@ int smoothDefault = 1500;
 
 int peakLeftThreshold = 100;
 int peakRightThreshold = 280;
-bool singlePrinter = false;
-bool hardMode = true; //There are runs with extremely low light intensity (45,46,47 e.g) without a sharp first APO peak -> get some integration window for them
+bool singlePrinter = true;
+bool hardMode =true; //There are runs with extremely low light intensity (45,46,47 e.g) without a sharp first APO peak -> get some integration window for them
 float labelTextSize = 0.02;
 int lineSize = 2;
 
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 
 	if (singlePrinter)
 	{
-		labelTextSize = 0.05;
+		labelTextSize = 0.03;
 		lineSize = 4;
 	}
 
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 	file->GetObject("T", tree);
 
 	//Create 2 Canvas -> 1 for sumHistograms, 1 for Percentage Plots
-	TCanvas *sumCanvas = new TCanvas("sumCanvas", "Sum Histogram", 1600, 1000);
+	TCanvas *sumCanvas = new TCanvas("sumCanvas", "Sum Histogram", 1000, 1000);
 	TCanvas *percentageCanvas = new TCanvas("percentageCanvas", "Percentages", 1000, 1000);
 
 	int channelNumber = 8;
@@ -272,8 +272,8 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		sumCanvas->Divide(1, 2);
-		percentageCanvas->Divide(1, 2);
+		sumCanvas->Divide(1, 1);
+		percentageCanvas->Divide(1, 1);
 	}
 
 	sumCanvas->SetLeftMargin(0.15);
@@ -672,17 +672,19 @@ int main(int argc, char *argv[])
 			percentageCanvas->cd(1);
 		}
 
-		float xmin = -5.0; //EXTREMELY IMPORTANT -> include all values in the histogram, otherwise the CF is biased
-		float xmax = +5;
+		float xmin = -2.0; //EXTREMELY IMPORTANT -> include all values in the histogram, otherwise the CF is biased
+		float xmax = +2;
 		int nBins = 200;
-		gPad->SetGridx();
-		gPad->SetGridy();
+		//gPad->SetGridx();
+		//gPad->SetGridy();
 
 		TH1F *h = new TH1F("h", "Percentage", nBins, xmin, xmax);
 		h->SetTitle("");
 		h->SetLineColorAlpha(kBlack, 1);
+		h->SetLineWidth(3);
+
 		h->SetMarkerStyle(7);
-		h->SetMarkerColorAlpha(kBlack, 0.6);
+		h->SetMarkerColorAlpha(kBlack, 1);
 
 		TString cut("");
 		tree->Draw(Form("IntegralDifference[%d]>>h", i), cut);
@@ -692,7 +694,7 @@ int main(int argc, char *argv[])
 		percentageCanvas->Update();
 		minY = gPad->GetUymin();
 		maxY = gPad->GetUymax();
-		TLegend *h_leg = new TLegend(0.15, 0.70, 0.51, 0.9);
+		TLegend *h_leg = new TLegend(0.54, 0.75, 0.90, 0.9);
 		h_leg->SetTextFont(62);
 		if (!singlePrinter)
 			h_leg->SetHeader(Form("Percentages Channel: %d", i), "c");
@@ -705,7 +707,7 @@ int main(int argc, char *argv[])
 		TAxis *yaxisP = h->GetYaxis();
 		TAxis *xaxisP = h->GetXaxis();
 		yaxisP->SetLabelSize(labelTextSize);
-		yaxisP->SetTitle("Counts");
+		yaxisP->SetTitle("counts");
 		xaxisP->SetLabelSize(labelTextSize);
 
 		xaxisP->SetTitle(Form("f_{W}"));
@@ -734,14 +736,18 @@ int main(int argc, char *argv[])
 		//	meanLineError->Draw();
 
 		//double mean=gauss->GetParameter(1);
-		h_leg->AddEntry(meanLine, Form("Mean Dist: %1.3lf +- %1.3lf", meanP, meanErrorP), "l");
-		h_leg->AddEntry(sumPLine, Form("Mean CSW: %1.3lf", sumPercentage), "l");
+		h_leg->AddEntry(meanLine, Form("#bar{f}_{W}: %1.3lf +- %1.3lf", meanP, meanErrorP), "l");
+		h_leg->AddEntry(sumPLine, Form("f_{W}^{CSW}: %1.3lf", sumPercentage), "l");
 
 		TLine *dummyP = new TLine(0, 0, 0, 0);
 		dummyP->SetLineColorAlpha(4, 0.14);
-		h_leg->AddEntry(dummyP, Form("Err D.  : %1.3lf  ", pError), "l");
-
+	//	h_leg->AddEntry(dummyP, Form("Err D.  : %1.3lf  ", pError), "l");
+		
+		h->GetXaxis()->SetRangeUser(0.2,1.6);
 		h_leg->Draw();
+
+
+
 
 		if (printPercentage)
 			fprintf(file_listP, "%f/%f,", meanP, pError);
