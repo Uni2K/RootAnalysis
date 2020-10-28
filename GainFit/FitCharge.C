@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 
       break;
     }
-
+xmax =- 400;
     // open tree
     cout << "Doing: " << in_dir << endl;
     TFile *file = new TFile(in_dir.c_str());
@@ -409,7 +409,7 @@ int main(int argc, char **argv)
 
     TF1 *f = new TF1("fitf", fitf, fitLimitStart, fitLimitEnd, 7);
     h->GetYaxis()->SetTitle("counts");
-    h->GetXaxis()->SetTitle("mV #times ns");
+    h->GetXaxis()->SetTitle("#Lambda [mV #times ns]");
     if (light)
     {
       h->GetXaxis()->SetLabelSize(0.04);
@@ -509,7 +509,7 @@ int main(int argc, char **argv)
       h2->Fit("alt", "RQM");
 
     h2->GetYaxis()->SetTitle("counts");
-    h2->GetXaxis()->SetTitle("mV #times ns");
+    h2->GetXaxis()->SetTitle("#Lambda [mV #times ns]");
     if (light)
     {
       h2->GetXaxis()->SetLabelSize(0.04);
@@ -568,18 +568,18 @@ int main(int argc, char **argv)
       h_leg->AddEntry((TObject *)0, Form("integration window 25 ns"), "");
     if (!light)
       h_leg->AddEntry(f, Form("Generalized Poisson #times Gaussian fit"), "l");
-    h_leg->AddEntry((TObject *)0, Form("#chi^{2}_{red} = %1.2f", GP_chi2_ndof), "");
+    h_leg->AddEntry((TObject *)0, Form("#chi^{2}_{red} = %1.3f", GP_chi2_ndof), "");
     // if (!light)
     h_leg->AddEntry((TObject *)0, Form("N = %1.f #pm %1.f", norm, norm_err), "");
     // if (!light)
-    h_leg->AddEntry((TObject *)0, Form("#mu = %1.2f #pm %1.2f", mu, mu_err), "");
+    h_leg->AddEntry((TObject *)0, Form("#mu = %1.3f #pm %1.3f", mu, mu_err), "");
     // if (!light)
     h_leg->AddEntry((TObject *)0, Form("#lambda = %1.3f #pm %1.3f", mu_xt, mu_xt_err), "");
     if (!light)
-      h_leg->AddEntry((TObject *)0, Form("#sigma_{0} = %1.5f #pm %1.5f", sig0, sig0_err), "");
+      h_leg->AddEntry((TObject *)0, Form("#sigma_{0} = %1.3f #pm %1.3f", sig0, sig0_err), "");
     if (!light)
-      h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.5f #pm %1.5f", sig1, sig1_err), "");
-    h_leg->AddEntry((TObject *)0, Form("B = %1.5f #pm %1.5f", baseline, baseline_err), "");
+      h_leg->AddEntry((TObject *)0, Form("#sigma_{1} = %1.3f #pm %1.3f", sig1, sig1_err), "");
+    h_leg->AddEntry((TObject *)0, Form("B = %1.3f #pm %1.3f", baseline, baseline_err), "");
         h_leg->AddEntry((TObject *)0, Form("#Lambda_{pixel} = %1.3f #pm %1.3f", calib_factor, calib_factor_err), "");
 
     if (!light)

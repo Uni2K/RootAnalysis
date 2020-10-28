@@ -173,10 +173,10 @@ int main(int argc, char *argv[])
 		h_leg->SetTextSize(0.03);
 	
 
-
-		tree->Draw("Integral[1]>>allHist", "");
-		tree->Draw("IntegralErrorP[1]>>allHistErrorP", "");
-		tree->Draw("IntegralErrorM[1]>>allHistErrorM", "");
+		
+		tree->Draw("Integral[2]>>allHist", "");
+		tree->Draw("IntegralErrorP[2]>>allHistErrorP", "");
+		tree->Draw("IntegralErrorM[2]>>allHistErrorM", "");
 
 
 		
@@ -188,9 +188,9 @@ int main(int argc, char *argv[])
 		float dcf=0.077463;
 		
 
-		h_leg->AddEntry(allHist, Form("unshifted PCS, mean: %1.0f",mean), "f");
-		h_leg->AddEntry(allHistErrorP, Form("up-shifted PCS, mean: %1.0f",meanErrorP), "l");
-		h_leg->AddEntry(allHistErrorM, Form("down-shifted PCS, mean: %1.0f",meanErrorM), "l");
+		h_leg->AddEntry(allHist, Form("default PCS, mean: %1.0f",mean), "f");
+		h_leg->AddEntry(allHistErrorP, Form("up-scaled PCS, mean: %1.0f",meanErrorP), "l");
+		h_leg->AddEntry(allHistErrorM, Form("down-scaled PCS, mean: %1.0f",meanErrorM), "l");
 		h_leg->AddEntry((TObject *)0, Form("CF: %1.2f #pm %1.2f",cf,dcf), "");
 
 
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 		yaxisP->SetTitle("counts");
 		yaxisP->SetTitleSize(0.04);
 		xaxisP->SetLabelSize(0.04);
-		xaxisP->SetTitle("integral [mV #times ns]");
+		xaxisP->SetTitle("#Lambda [mV #times ns]");
 		xaxisP->SetTitleSize(0.04);
 
 		h_leg->Draw();

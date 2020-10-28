@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 	cout << "Energy Deposition:  Scintillator/Walls/Else:  " << pESc << "/" << pEW << "/" << pEElse << endl;
 
 	FILE *pFile = fopen("Data.txt", "a");
-	fprintf(pFile, "%s={%f,%f,%f,%d,%f,%f,%f}\n", string(formattedName).c_str(), pReachedWOM, pDetectedWOM, pSiPMs, (int)totalPhotons, pESc, pEW, pEElse);
+	fprintf(pFile, "%s={%f,%f,%f,%d,%f,%f,%f}\n", string(formattedName).c_str(), pReachedWOM, pDetectedWOM, pSiPMs, (int)totalPhotons, eDepSc, eDepW , eDepElse);
 	fclose(pFile);
 
 	cout << "" << endl;
